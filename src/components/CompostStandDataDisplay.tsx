@@ -9,7 +9,7 @@ const initialUserData: CompostStandDataDTO = {
     {
       id: '6',
       name: "alexander_zaid",
-      weight: "12"
+      weight: 0
     }
   ],
   period: 30
@@ -50,7 +50,8 @@ const CompostStandDataDisplay = () => {
         min={ 0 }
       />
       {
-        createCompostStandData(compostStandData.depositsWeightsByStands).map(compostStand => (
+        createCompostStandData(compostStandData.depositsWeightsByStands)
+          .map(compostStand => (
           <CompostStandDataItem compostStand={compostStand} />
         ))
       }

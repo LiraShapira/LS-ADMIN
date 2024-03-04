@@ -36,7 +36,7 @@ export const standsNameToIdMap: Record<CompostStandName, number> = {
 export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsByStand[]): DepositsWeightsByStand[] => {
   return Object.entries(standsIdToNameMap).map(([id, name]) => {
     const compostStandDTO = depositsWeightsByStand.find(n => n.id === id);
-    const weight = compostStandDTO ? compostStandDTO.weight : '0';
+    const weight = compostStandDTO ? compostStandDTO.weight : 0;
     return {
       id,
       name,

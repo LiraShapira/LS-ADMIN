@@ -23,7 +23,7 @@ const CompostStandDataItem = ({compostStand}: CompostStandDataItemProp) => {
         { compostStand.name }
          </span>
       </div>
-      <div>weight: { compostStand.weight } kg</div>
+      <div>deposit weight: { compostStand.weight } kg</div>
     </div>
   )
 }

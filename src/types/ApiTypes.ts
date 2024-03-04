@@ -15,7 +15,7 @@ export type ApiServiceReturnType<T> = SuccessApiResponse<T> | Error
 export type ApiResponse<T> = FailApiResponse | SuccessApiResponse<T>
 
 export interface DepositsWeightsByStand extends CompostStand {
-  weight: string;
+  weight: number;
 }
 
 export interface CompostStandDataDTO {
