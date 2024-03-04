@@ -1,23 +1,17 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import './App.css';
-import {fetchUserStats} from "./apiServices/userAPI";
+import DataDashBoard from "./components/DataDashBoard";
+import {AppPage} from "./types/AppTypes";
+import NavBar from "./components/NavBar";
 
 function App() {
-  const [userStats, setUserStats] = useState([]);
+  const [appDisplay, setAppDisplay] = useState<AppPage>('users')
 
-  useEffect(() => {
-    fetchUserStats()
-      .then((stats) => {
-        // @ts-ignore
-        setUserStats(stats.data);
-    })
-  }, [])
   return (
     <div className="App">
       <body className="App-header">
-      <p>
-        userStats
-      </p>
+      <NavBar currentPage={ appDisplay } setCurrentPage={ setAppDisplay }/>
+      <DataDashBoard currentPage={appDisplay}/>
       </body>
     </div>
   );
