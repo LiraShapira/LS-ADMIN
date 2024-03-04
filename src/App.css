@@ -5,13 +5,74 @@
 body {
   background-color: #282c34;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   color: white;
 }
 
 .App-link {
   color: #61dafb;
 }
+
+.DataDisplay {
+  width: 30%;
+  min-width: 300px;
+}
+
+.NavBar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: row;
+  background: #D6FADE;
+}
+
+button {
+  display: inline-block;
+  border: none;
+  padding: 1rem 2rem;
+  margin: 0;
+  text-decoration: none;
+  color: #ffffff;
+  font-family: sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background 150ms ease-in-out,
+  transform 150ms ease;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.NavBar__tab {
+  width: 100%;
+  background-color: #0F4C26;
+}
+
+.NavBar__selected {
+  height: 100%;
+  background-color: #292b32;
+}
+
+.DataDisplay__title {
+
+}
+
+.DataDashBoard {
+  display: flex;
+}
+
+.DataDisplay__property {
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (max-width: 600px) {
+  .NavBar {
+    display: flex;
+    flex-direction: column;
+  }
+
+}
+
