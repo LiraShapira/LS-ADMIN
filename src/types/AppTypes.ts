@@ -1,1 +1,1 @@
-export type AppPage = 'users' | 'compostStands' | 'transactions'
+export type AppPage = 'users' | 'compostStands' | 'transactions' | 'events'
