@@ -1,20 +1,27 @@
+:root {
+  --text: #000;
+  --background: #fff;
+  --backgroundHighlight1: #ebf5eb;
+  --backgroundHighlight2: #f2e4eb;
+  --shading: #e0e0e0;
+  --highlight: #6cb041;
+  --tint: #4195b0;
+  --tabIconDefault: #ccc;
+  --warning: #b04141;
+}
+
 .App {
   text-align: center;
 }
 
 body {
-  background-color: #282c34;
+  background-color: var(--background);
   min-height: 100vh;
-  color: white;
+  color: var(--text);
 }
 
 .App-link {
-  color: #61dafb;
-}
-
-.DataDisplay {
-  width: 30%;
-  min-width: 300px;
+  color: var(--tint);
 }
 
 .NavBar {
@@ -22,7 +29,7 @@ body {
   justify-content: space-around;
   align-items: center;
   flex-direction: row;
-  background: #D6FADE;
+  background: #d6fade;
 }
 
 button {
@@ -31,37 +38,36 @@ button {
   padding: 1rem 2rem;
   margin: 0;
   text-decoration: none;
-  color: #ffffff;
+  color: var(--background);
   font-family: sans-serif;
   font-size: 1rem;
   cursor: pointer;
   text-align: center;
-  transition: background 150ms ease-in-out,
-  transform 150ms ease;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+  transition: background 150ms ease-in-out, transform 150ms ease;
 }
 
 .NavBar__tab {
   width: 100%;
-  background-color: #0F4C26;
+  background-color: var(--highlight);
+  color: var(--background);
 }
 
 .NavBar__selected {
   height: 100%;
-  background-color: #292b32;
-}
-
-.DataDisplay__title {
-
+  color: black;
+  background-color: #ffffff;
+  font-weight: 700;
 }
 
 .DataDashBoard {
   display: flex;
 }
 
+.DataDisplay {
+  flex: 1 0 0;
+}
+
 .DataDisplay__property {
-  color: white;
   display: flex;
   justify-content: space-between;
   padding: 0 10px;
@@ -73,6 +79,4 @@ button {
     display: flex;
     flex-direction: column;
   }
-
 }
-
