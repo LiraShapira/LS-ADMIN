@@ -6,7 +6,7 @@ const UserItemList = ({ users }: { users: User[] }) => {
     <div>
       {users.map((user) => {
         return (
-          <div>
+          <div key={user.id}>
             <UserItem user={user}></UserItem>
             <br></br>
           </div>

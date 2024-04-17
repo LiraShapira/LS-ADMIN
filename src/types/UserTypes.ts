@@ -17,5 +17,5 @@ export interface User {
   accountBalance: string,
   email?: string,
   phoneNumber: string,
-  adminCompostStandId: number,
+  adminCompostStandId: number | null,
 }
