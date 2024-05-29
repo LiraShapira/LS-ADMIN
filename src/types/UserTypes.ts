@@ -1,3 +1,10 @@
+import { Transaction } from "./TransactionTypes";
+
+export enum UserRole {
+  ADMIN = 'admin',
+  BASIC = 'basic'
+}
+
 export interface UserData {
   userCount: number;
   newUserCount: number;
@@ -5,17 +12,18 @@ export interface UserData {
   averageTransactionsPerUser: number;
   depositsPerUser: number[];
   period: number;
-  balanceCounts: any;
+  balanceCounts: any
 }
 
 export interface User {
   id: string,
   firstName: string,
   lastName: string,
-  role: "BASIC" | "ADMIN",
+  role: UserRole,
   createdAt: string,
   accountBalance: string,
   email?: string,
   phoneNumber: string,
-  adminCompostStandId: number | null,
+  transactions: Transaction[];
+  adminCompostStandId: number | null;
 }

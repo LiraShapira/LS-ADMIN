@@ -24,12 +24,13 @@ const UserTab = () => {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       <UserDataDisplay />
-      <div style={{ flex: '1 0 200px' }}>
-        <span>
-          <h2 onClick={() => setUserListOpen((p) => !p)}>
-            User List {userListOpen ? '🔽' : '▶'}
-          </h2>
-        </span>
+      <div>
+        <button
+          style={{ width: 400, margin: 2, border: '2px solid black' }}
+          onClick={() => setUserListOpen((p) => !p)}
+        >
+          <h2>User List {userListOpen ? '🔽' : '▶'}</h2>
+        </button>
         {userListOpen && <UserItemList users={users} />}
       </div>
     </div>
