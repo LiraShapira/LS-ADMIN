@@ -6,8 +6,11 @@ const LSEventsList = ({ events }: { events: LSEvent[] }) => {
   return (
     <div>
       {events.map((LSEvent) => (
-        <div style={{ border: 'solid 2px black', margin: 8, padding: 4 }}>
-          <LSEventItem key={LSEvent.id} LSEvent={LSEvent} />
+        <div
+          key={LSEvent.id}
+          style={{ border: 'solid 2px black', margin: 8, padding: 4 }}
+        >
+          <LSEventItem LSEvent={LSEvent} />
         </div>
       ))}
     </div>
