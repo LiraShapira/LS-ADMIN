@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
-import { LSEvent } from '../../types/EventTypes';
-import { fetchLSEventsData } from '../../apiServices/EventsApi';
+import { useEffect } from 'react';
 import LSEventsList from './LSEventsList';
-import AddEvent from './AddNewEvents';
+import AddOrEditEvent from './AddOrEditEvent';
+import { useAppDispatch, useAppSelector } from '../../utils/hooks';
+import { loadEvents, setEvents, selectEvents } from '../../store/eventsSlice';
 
 const EventsTab = () => {
-  const [events, setEvents] = useState<LSEvent[]>([]);
+  const dispatch = useAppDispatch();
+  const events = useAppSelector(selectEvents);
   useEffect(() => {
-    fetchLSEventsData()
+    dispatch(loadEvents())
+      .unwrap()
       .then((response) => {
         if (response instanceof Error) {
           throw new Error(response.message);
         }
-        setEvents(response.data);
+        dispatch(setEvents(response.data));
       })
       .catch((e) => {
         throw new Error(e);
@@ -23,7 +25,7 @@ const EventsTab = () => {
     <div>
       <div>Events:</div>
       <div>
-        <AddEvent setEvents={setEvents} />
+        <AddOrEditEvent currentLSEvent={events[0]} />
       </div>
       <div>
         {events.length ? (
