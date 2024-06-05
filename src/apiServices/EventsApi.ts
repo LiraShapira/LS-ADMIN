@@ -62,3 +62,24 @@ export const saveEventToDatabase = async (event: LSEvent): Promise<ApiServiceRet
     return e;
   }
 }
+
+export const updateEventInDatabase = async (event: Partial<LSEvent>): Promise<ApiServiceReturnType<LSEvent>> => {
+  let urlString = `${SERVER_URL}/updateEvent`
+  try {
+    const response: Response = await fetch(urlString, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(event),
+      method: "POST"
+    })
+    const JSONResponse = await response.json();
+    if (response.status === 400) {
+      throw new Error(JSONResponse.error);
+    }
+
+    return { data: JSONResponse, status: response.status };
+  } catch (e: any) {
+    return e;
+  }
+}

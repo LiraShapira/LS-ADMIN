@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import LSEventsList from './LSEventsList';
-import AddOrEditEvent from './AddOrEditEvent';
+import AddEvent from './AddEvent';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { loadEvents, setEvents, selectEvents } from '../../store/eventsSlice';
+import { DateTime } from 'luxon';
 
 const EventsTab = () => {
   const dispatch = useAppDispatch();
@@ -14,7 +15,12 @@ const EventsTab = () => {
         if (response instanceof Error) {
           throw new Error(response.message);
         }
-        dispatch(setEvents(response.data));
+        const eventsInLocalTime = response.data.map((event) => ({
+          ...event,
+          endDate: DateTime.fromISO(event.endDate).toString(),
+          startDate: DateTime.fromISO(event.startDate).toString(),
+        }));
+        dispatch(setEvents(eventsInLocalTime));
       })
       .catch((e) => {
         throw new Error(e);
@@ -25,9 +31,9 @@ const EventsTab = () => {
     <div>
       <div>Events:</div>
       <div>
-        <AddOrEditEvent currentLSEvent={events[0]} />
+        <AddEvent />
       </div>
-      <div>
+      <div style={{ margin: 5 }}>
         {events.length ? (
           <LSEventsList events={events}></LSEventsList>
         ) : (
