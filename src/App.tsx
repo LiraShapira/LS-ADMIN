@@ -5,18 +5,21 @@ import { AppPage } from './types/AppTypes';
 import NavBar from './components/NavBar';
 import { Provider } from 'react-redux';
 import { store } from './store/index';
+import Loader from './components/Loader';
 
 function App() {
   const [appDisplay, setAppDisplay] = useState<AppPage>('users');
 
   return (
     <Provider store={store}>
-      <div className='App'>
-        <div className='App-header'>
-          <NavBar currentPage={appDisplay} setCurrentPage={setAppDisplay} />
-          <DataDashBoard currentPage={appDisplay} />
+      <Loader>
+        <div className='App'>
+          <div className='App-header'>
+            <NavBar currentPage={appDisplay} setCurrentPage={setAppDisplay} />
+            <DataDashBoard currentPage={appDisplay} />
+          </div>
         </div>
-      </div>
+      </Loader>
     </Provider>
   );
 }

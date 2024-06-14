@@ -1,9 +1,11 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import eventsSlice from './eventsSlice';
+import appSlice from './appSlice';
 
 export const store = configureStore({
   reducer: {
-    eventState: eventsSlice
+    eventState: eventsSlice,
+    appState: appSlice
   },
 });
 
