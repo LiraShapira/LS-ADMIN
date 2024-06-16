@@ -2,21 +2,21 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '.';
 import { SuccessApiResponse } from '../types/ApiTypes';
 import { LSEvent } from '../types/EventTypes';
-import { fetchLSEventsData, saveEventToDatabase, updateEventInDatabase } from '../apiServices/EventsApi';
+import { deleteEventInDB, fetchLSEventsData, saveEventToDatabase, updateEventInDatabase } from '../apiServices/EventsApi';
 import { mockEvent1 } from '../mocks/mockEvents';
 
 interface EventsState {
   events: LSEvent[];
   selectedEvent: LSEvent;
   isEditMode: boolean;
-  loading: boolean;
+  deleteCounter: 0 | 1;
 }
 
 const initialState: EventsState = {
   events: [],
   selectedEvent: mockEvent1,
   isEditMode: false,
-  loading: false
+  deleteCounter: 0
 };
 
 export const loadEvents = createAsyncThunk<
@@ -46,11 +46,24 @@ export const saveEvent = createAsyncThunk<
   });
 
 export const updateEvent = createAsyncThunk<
-  SuccessApiResponse<LSEvent>,
+  SuccessApiResponse<LSEvent[]>,
   Partial<LSEvent>,
   { state: RootState }>
-  ('eventsSlice/loadEvents', async (event): Promise<SuccessApiResponse<LSEvent>> => {
+  ('eventsSlice/loadEvents', async (event): Promise<SuccessApiResponse<LSEvent[]>> => {
     const response = await updateEventInDatabase(event);
+    if (!('data' in response)) {
+      throw new Error(response.message);
+    } else {
+      return response;
+    }
+  });
+
+export const deleteEvent = createAsyncThunk<
+  SuccessApiResponse<LSEvent>,
+  { id: string },
+  { state: RootState }>
+  ('eventsSlice/deleteEvent', async ({ id }): Promise<SuccessApiResponse<LSEvent>> => {
+    const response = await deleteEventInDB({ id });
     if (!('data' in response)) {
       throw new Error(response.message);
     } else {
@@ -70,25 +83,17 @@ const eventsSlice = createSlice({
     },
     setIsEditMode: (state, action: PayloadAction<boolean>) => {
       state.isEditMode = action.payload;
+    },
+    toggleDeleteCounter: (state) => {
+      state.deleteCounter = state.deleteCounter === 0 ? 1 : 0;
     }
-  },
-  extraReducers: builder => {
-    builder
-      .addCase(loadEvents.pending, state => {
-        state.loading = true;
-      })
-      .addCase(loadEvents.fulfilled, (state) => {
-        state.loading = false;
-      })
-      .addCase(loadEvents.rejected, (state) => {
-        state.loading = false;
-      })
-  },
+  }
 });
 
 export const selectSelectedEvent = (state: RootState) => state.eventState.selectedEvent;
 export const selectEvents = (state: RootState) => state.eventState.events;
 export const selectIsEditMode = (state: RootState) => state.eventState.isEditMode;
-export const { setSelectedEvent, setEvents, setIsEditMode } = eventsSlice.actions;
+export const selectDeleteCounter = (state: RootState) => state.eventState.deleteCounter;
+export const { setSelectedEvent, toggleDeleteCounter, setEvents, setIsEditMode } = eventsSlice.actions;
 
 export default eventsSlice.reducer;

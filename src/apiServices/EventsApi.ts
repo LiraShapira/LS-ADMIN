@@ -63,7 +63,7 @@ export const saveEventToDatabase = async (event: LSEvent): Promise<ApiServiceRet
   }
 }
 
-export const updateEventInDatabase = async (event: Partial<LSEvent>): Promise<ApiServiceReturnType<LSEvent>> => {
+export const updateEventInDatabase = async (event: Partial<LSEvent>): Promise<ApiServiceReturnType<LSEvent[]>> => {
   let urlString = `${SERVER_URL}/updateEvent`
   try {
     const response: Response = await fetch(urlString, {
@@ -79,6 +79,28 @@ export const updateEventInDatabase = async (event: Partial<LSEvent>): Promise<Ap
     }
 
     return { data: JSONResponse, status: response.status };
+  } catch (e: any) {
+    return e;
+  }
+}
+
+
+export const deleteEventInDB = async ({ id }: { id: string }): Promise<ApiServiceReturnType<LSEvent>> => {
+  try {
+    const requestString = `${SERVER_URL}/deleteEvent`;
+    const response = await fetch(requestString, {
+      method: 'DELETE',
+      body: JSON.stringify({ id }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    const JSONresponse = await response.json()
+
+    if (response.status !== 202) {
+      throw new Error(JSONresponse.error);
+    }
+    return { data: JSONresponse, status: response.status };
   } catch (e: any) {
     return e;
   }

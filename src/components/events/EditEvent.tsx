@@ -4,17 +4,27 @@ import { LSEvent, Location } from '../../types/EventTypes';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import {
   selectIsEditMode,
-  selectEvents,
   selectSelectedEvent,
   setEvents,
   updateEvent,
   setIsEditMode,
+  deleteEvent,
+  toggleDeleteCounter,
+  selectDeleteCounter,
+  selectEvents,
 } from '../../store/eventsSlice';
+import { DateTime } from 'luxon';
+import {
+  setIsModalVisible,
+  setLoading,
+  setModalText,
+} from '../../store/appSlice';
 
 const EditEvent = () => {
   const dispatch = useAppDispatch();
-  const events = useAppSelector(selectEvents);
   const selectedEvent = useAppSelector(selectSelectedEvent);
+  const LSEvents = useAppSelector(selectEvents);
+  const deleteCounter = useAppSelector(selectDeleteCounter);
   const isEditMode = useAppSelector(selectIsEditMode);
   const [eventTitle, setEventTitle] = useState('');
   const [eventDescription, setEventDescription] = useState('');
@@ -48,15 +58,48 @@ const EditEvent = () => {
     dispatch(setIsEditMode(false));
   };
 
+  const onClickDelete = () => {
+    debugger;
+    dispatch(setLoading(true));
+    dispatch(toggleDeleteCounter());
+    if (deleteCounter === 0) {
+      dispatch(
+        setModalText(
+          'CAREFUL! You are about to delete the event: "' +
+            selectedEvent.title +
+            '" if you are sure you would like to do this, repeat the action'
+        )
+      );
+      dispatch(setIsModalVisible(true));
+      dispatch(setLoading(false));
+    } else {
+      try {
+        dispatch(deleteEvent({ id: selectedEvent.id }))
+          .unwrap()
+          .then((response) => {
+            if (response.data) {
+              const newEventList = LSEvents.filter(
+                (e) => e.id !== response.data.id
+              );
+              dispatch(setEvents(newEventList));
+            }
+            dispatch(setLoading(false));
+          });
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  };
+
   const onFormSubmit = (e: FormEvent) => {
+    dispatch(setLoading(true));
     e.preventDefault();
-    const newEvent: LSEvent = {
+    const newEvent: Omit<LSEvent, 'attendees'> = {
       id: selectedEvent.id,
       title: eventTitle,
       description: eventDescription,
       startDate,
       endDate,
-      attendees: [],
       location: { id: selectedLocationId },
     };
     setEventTitle('');
@@ -70,9 +113,12 @@ const EditEvent = () => {
             throw new Error(response.message);
           }
           const LSEvents = response.data;
-          dispatch(setEvents([...events, LSEvents]));
+          dispatch(setEvents(LSEvents));
+          dispatch(setIsEditMode(false));
         });
+      dispatch(setLoading(false));
     } catch (e) {
+      dispatch(setLoading(false));
       console.log(e);
     }
   };
@@ -112,24 +158,35 @@ const EditEvent = () => {
         <div>
           <label htmlFor='startTime'>start time</label>
           <input
-            onChange={(e) => setStartDate(e.target.value)}
+            value={startDate.slice(0, 16)}
+            onChange={(e) =>
+              setStartDate(DateTime.fromISO(e.target.value).toString())
+            }
             name='startTime'
-            value={startDate}
             type='datetime-local'
           ></input>
         </div>
         <div>
           <label htmlFor='endTime'>end time</label>
           <input
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            value={endDate.slice(0, 16)}
+            onChange={(e) =>
+              setEndDate(DateTime.fromISO(e.target.value).toString())
+            }
             name='endTime'
             type='datetime-local'
           ></input>
         </div>
         <div style={{ display: 'flex', gap: 5, margin: 5 }}>
-          <button type='submit'>SUBMIT</button>
-          <button onClick={onClickCancel}>CANCEL</button>
+          <button type='submit' onClick={onFormSubmit}>
+            SUBMIT
+          </button>
+          <button type='button' onClick={onClickDelete}>
+            DELETE
+          </button>
+          <button type='button' onClick={onClickCancel}>
+            CANCEL
+          </button>
         </div>
       </form>
     </div>
