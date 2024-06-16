@@ -6,6 +6,7 @@ import NavBar from './components/NavBar';
 import { Provider } from 'react-redux';
 import { store } from './store/index';
 import Loader from './components/Loader';
+import Modal from './components/Modal';
 
 function App() {
   const [appDisplay, setAppDisplay] = useState<AppPage>('users');
@@ -13,12 +14,14 @@ function App() {
   return (
     <Provider store={store}>
       <Loader>
-        <div className='App'>
-          <div className='App-header'>
-            <NavBar currentPage={appDisplay} setCurrentPage={setAppDisplay} />
-            <DataDashBoard currentPage={appDisplay} />
+        <Modal>
+          <div className='App'>
+            <div className='App-header'>
+              <NavBar currentPage={appDisplay} setCurrentPage={setAppDisplay} />
+              <DataDashBoard currentPage={appDisplay} />
+            </div>
           </div>
-        </div>
+        </Modal>
       </Loader>
     </Provider>
   );

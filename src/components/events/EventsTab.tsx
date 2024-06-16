@@ -4,11 +4,17 @@ import AddEvent from './AddEvent';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { loadEvents, setEvents, selectEvents } from '../../store/eventsSlice';
 import { DateTime } from 'luxon';
+import {
+  setIsModalVisible,
+  setLoading,
+  setModalText,
+} from '../../store/appSlice';
 
 const EventsTab = () => {
   const dispatch = useAppDispatch();
   const events = useAppSelector(selectEvents);
   useEffect(() => {
+    dispatch(setLoading(true));
     dispatch(loadEvents())
       .unwrap()
       .then((response) => {
@@ -21,8 +27,12 @@ const EventsTab = () => {
           startDate: DateTime.fromISO(event.startDate).toString(),
         }));
         dispatch(setEvents(eventsInLocalTime));
+        dispatch(setLoading(false));
       })
       .catch((e) => {
+        dispatch(setModalText(e.message));
+        dispatch(setIsModalVisible(true));
+        dispatch(setLoading(false));
         throw new Error(e);
       });
   }, []);

@@ -1,4 +1,4 @@
-import { selectIsModalVisible } from '../store/appSlice';
+import { selectIsLoading } from '../store/appSlice';
 import { useAppSelector } from '../utils/hooks';
 
 interface LoaderProps {
@@ -6,11 +6,11 @@ interface LoaderProps {
 }
 
 const Loader = ({ children }: LoaderProps) => {
-  const isModalVisible = useAppSelector(selectIsModalVisible);
+  const loading = useAppSelector(selectIsLoading);
 
   return (
     <>
-      {isModalVisible && (
+      {loading && (
         <div className='overlay'>
           <div className='loader'></div>
         </div>

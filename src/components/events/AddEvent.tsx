@@ -6,6 +6,7 @@ import {
 import { LSEvent, Location } from '../../types/EventTypes';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { selectEvents, setEvents } from '../../store/eventsSlice';
+import { setLoading } from '../../store/appSlice';
 
 const AddEvent = () => {
   const dispatch = useAppDispatch();
@@ -32,6 +33,7 @@ const AddEvent = () => {
   }, []);
 
   const onFormSubmit = (e: FormEvent) => {
+    dispatch(setLoading(true));
     e.preventDefault();
     const newEvent: LSEvent = {
       // this id will be replaced by a random uuid in backend
@@ -55,9 +57,11 @@ const AddEvent = () => {
         const LSEvents = response.data;
         // if  edit , then current event needs to be replaced instead of added
         dispatch(setEvents([...events, LSEvents]));
+        dispatch(setLoading(false));
       });
     } catch (e) {
       console.log(e);
+      dispatch(setLoading(false));
     }
   };
 
