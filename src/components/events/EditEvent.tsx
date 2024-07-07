@@ -19,6 +19,7 @@ import {
   setLoading,
   setModalText,
 } from '../../store/appSlice';
+import { getCurrentDateTimeString } from '../../utils/timeAndDate';
 
 const EditEvent = () => {
   const dispatch = useAppDispatch();
@@ -59,7 +60,6 @@ const EditEvent = () => {
   };
 
   const onClickDelete = () => {
-    debugger;
     dispatch(setLoading(true));
     dispatch(toggleDeleteCounter());
     if (deleteCounter === 0) {
@@ -78,9 +78,7 @@ const EditEvent = () => {
           .unwrap()
           .then((response) => {
             if (response.data) {
-              const newEventList = LSEvents.filter(
-                (e) => e.id !== response.data.id
-              );
+              const newEventList = response.data;
               dispatch(setEvents(newEventList));
             }
             dispatch(setLoading(false));
@@ -162,6 +160,7 @@ const EditEvent = () => {
             onChange={(e) =>
               setStartDate(DateTime.fromISO(e.target.value).toString())
             }
+            min={getCurrentDateTimeString()}
             name='startTime'
             type='datetime-local'
           ></input>
@@ -174,6 +173,7 @@ const EditEvent = () => {
               setEndDate(DateTime.fromISO(e.target.value).toString())
             }
             name='endTime'
+            min={startDate || getCurrentDateTimeString()}
             type='datetime-local'
           ></input>
         </div>

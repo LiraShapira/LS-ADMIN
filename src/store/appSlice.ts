@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '.';
 
-interface EventsState {
+interface AppState {
   loading: boolean;
   isModalVisible: boolean,
   modalText: string;
 
 }
 
-const initialState: EventsState = {
+const initialState: AppState = {
   isModalVisible: false,
   loading: false,
   modalText: ''

@@ -85,7 +85,7 @@ export const updateEventInDatabase = async (event: Partial<LSEvent>): Promise<Ap
 }
 
 
-export const deleteEventInDB = async ({ id }: { id: string }): Promise<ApiServiceReturnType<LSEvent>> => {
+export const deleteEventInDB = async ({ id }: { id: string }): Promise<ApiServiceReturnType<LSEvent[]>> => {
   try {
     const requestString = `${SERVER_URL}/deleteEvent`;
     const response = await fetch(requestString, {
@@ -97,7 +97,7 @@ export const deleteEventInDB = async ({ id }: { id: string }): Promise<ApiServic
     })
     const JSONresponse = await response.json()
 
-    if (response.status !== 202) {
+    if (response.status === 400) {
       throw new Error(JSONresponse.error);
     }
     return { data: JSONresponse, status: response.status };

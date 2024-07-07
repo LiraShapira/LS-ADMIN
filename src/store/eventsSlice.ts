@@ -59,10 +59,10 @@ export const updateEvent = createAsyncThunk<
   });
 
 export const deleteEvent = createAsyncThunk<
-  SuccessApiResponse<LSEvent>,
+  SuccessApiResponse<LSEvent[]>,
   { id: string },
   { state: RootState }>
-  ('eventsSlice/deleteEvent', async ({ id }): Promise<SuccessApiResponse<LSEvent>> => {
+  ('eventsSlice/deleteEvent', async ({ id }): Promise<SuccessApiResponse<LSEvent[]>> => {
     const response = await deleteEventInDB({ id });
     if (!('data' in response)) {
       throw new Error(response.message);

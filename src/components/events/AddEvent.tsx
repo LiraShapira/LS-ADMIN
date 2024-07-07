@@ -43,7 +43,6 @@ const AddEvent = () => {
       startDate,
       endDate,
       attendees: [],
-      // this id will be replaced by a random uuid in backend
       location: { id: selectedLocationId },
     };
     setEventTitle('');
@@ -73,6 +72,7 @@ const AddEvent = () => {
           <label htmlFor='name'>Title</label>
           <input
             name='title'
+            required
             value={eventTitle}
             onChange={(e) => setEventTitle(e.target.value)}
           />
@@ -80,6 +80,7 @@ const AddEvent = () => {
         <div>
           <label htmlFor='description'>description</label>
           <input
+            required
             name='description'
             value={eventDescription}
             onChange={(e) => setEventDescription(e.target.value)}
@@ -88,6 +89,7 @@ const AddEvent = () => {
         <div>
           <label htmlFor='locations'></label>
           <select
+            required
             onChange={(e) => setSelectedLocationId(e.target.value)}
             name='locations'
           >
@@ -104,6 +106,7 @@ const AddEvent = () => {
             onChange={(e) => setStartDate(e.target.value)}
             name='startTime'
             value={startDate}
+            required
             type='datetime-local'
           ></input>
         </div>
@@ -114,7 +117,9 @@ const AddEvent = () => {
             onChange={(e) => setEndDate(e.target.value)}
             name='endTime'
             type='datetime-local'
-          ></input>
+            required
+            min={startDate}
+          />
         </div>
         <button type='submit'>SUBMIT</button>
       </form>

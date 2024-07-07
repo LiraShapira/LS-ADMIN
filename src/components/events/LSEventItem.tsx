@@ -1,13 +1,17 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Attendee, LSEvent, Seller } from '../../types/EventTypes';
 import { formatDate, formatTime } from '../../utils/timeAndDate';
 import SellerItem from './SellerItem';
+import { useAppDispatch } from '../../utils/hooks';
+import { setIsEditMode, setSelectedEvent } from '../../store/eventsSlice';
 
-function isSeller(attendee: Attendee): attendee is Seller {
+export function isSeller(attendee: Attendee): attendee is Seller {
   return attendee.role === 'seller';
 }
 
 const LSEventItem = ({ LSEvent }: { LSEvent: LSEvent }) => {
+  const dispatch = useAppDispatch();
+
   const {
     endDateFormatted,
     endTimeFormatted,
@@ -35,7 +39,12 @@ const LSEventItem = ({ LSEvent }: { LSEvent: LSEvent }) => {
       sellers,
       startTimeFormatted,
     };
-  }, [LSEvent.id]);
+  }, [LSEvent.attendees, LSEvent.endDate, LSEvent.startDate]);
+
+  const onClickEdit = () => {
+    dispatch(setIsEditMode(true));
+    dispatch(setSelectedEvent(LSEvent));
+  };
 
   return (
     <div>
@@ -50,6 +59,12 @@ const LSEventItem = ({ LSEvent }: { LSEvent: LSEvent }) => {
           <span className='DataDisplay__key'>description:</span>
           <span className='DataDisplay__value'>
             <span>{LSEvent.description} </span>
+          </span>
+        </div>
+        <div className={'DataDisplay__property'}>
+          <span className='DataDisplay__key'>location:</span>
+          <span className='DataDisplay__value'>
+            <span>{LSEvent.location.name} </span>
           </span>
         </div>
         <div className={'DataDisplay__property'}>
@@ -94,9 +109,22 @@ const LSEventItem = ({ LSEvent }: { LSEvent: LSEvent }) => {
             </div>
           )}
         </div>
+        <div>
+          <strong>Attendees:</strong>
+          {LSEvent.attendees.length ? (
+            LSEvent.attendees.map((a) => (
+              <span>
+                {a.user.firstName} {a.user.lastName},
+              </span>
+            ))
+          ) : (
+            <div>no attendees yet </div>
+          )}
+        </div>
+        <button onClick={onClickEdit}>Edit</button>
       </div>
     </div>
   );
 };
 
-export default LSEventItem;
+export default memo(LSEventItem);

@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 // Function to format the date to 'DD.MM'
 export function formatDate(date: Date) {
   const day = date.getDate();
@@ -12,6 +14,11 @@ export function formatTime(date: Date) {
   const minutes = date.getMinutes().toString().padStart(2, '0');
   return `${hours}:${minutes}`;
 }
+
+export const getCurrentDateTimeString = () => {
+  return DateTime.local().toISO();
+};
+
 
 export const monthsLongForm: string[] = [
   'january',
