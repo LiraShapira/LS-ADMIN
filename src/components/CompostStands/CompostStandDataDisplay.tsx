@@ -1,30 +1,40 @@
 import { useEffect, useState } from 'react';
-import { CompostStandDataDTO } from '../types/ApiTypes';
-import { fetchCompostStandData } from '../apiServices/CompostStandAPI';
-import { createCompostStandData } from '../utils/CompostStandUtils';
+import { CompostStandDataDTO } from '../../types/ApiTypes';
+import { fetchCompostStandData } from '../../apiServices/CompostStandAPI';
+import { createCompostStandData } from '../../utils/CompostStandUtils';
 import CompostStandDataItem from './CompostStandDataItem';
-import { useAppDispatch } from '../utils/hooks';
-import { setIsModalVisible, setLoading, setModalText } from '../store/appSlice';
+import { useAppDispatch, useAppSelector } from '../../utils/hooks';
+import {
+  setIsModalVisible,
+  setLoading,
+  setModalText,
+} from '../../store/appSlice';
+import { loadReportStats, selectReports } from '../../store/compostStandSlice';
+import CompostStandChart from './CompostStandChart';
 
 const initialUserData: CompostStandDataDTO = {
   depositsWeightsByStands: [
     {
-      id: '6',
-      name: 'alexander_zaid',
-      weight: 0,
+      id: '9',
+      name: 'burma',
+      depositWeightSum: 148.92,
+      averageDepositWeight: 18.62,
+      depositCount: 8,
     },
   ],
   period: 30,
 };
 
 const CompostStandDataDisplay = () => {
-  const [compostStandData, setUserData] =
+  const [compostStandData, setCompostStandData] =
     useState<CompostStandDataDTO>(initialUserData);
   const [period, setPeriod] = useState<number>(30);
   const dispatch = useAppDispatch();
+  const standsWithReports = useAppSelector(selectReports);
 
   useEffect(() => {
     dispatch(setLoading(true));
+    dispatch(loadReportStats({ period }));
     // TODO debounce
     fetchCompostStandData({
       period,
@@ -33,7 +43,7 @@ const CompostStandDataDisplay = () => {
         if (response instanceof Error) {
           throw new Error(response.message);
         }
-        setUserData(response.data);
+        setCompostStandData(response.data);
         dispatch(setLoading(false));
       })
       .catch((e) => {
@@ -43,6 +53,7 @@ const CompostStandDataDisplay = () => {
       });
   }, [period]);
 
+  console.log(standsWithReports);
   return (
     <div className={'DataDisplay'}>
       <h2 className={'DataDisplay__title'}>Compost Stand Data</h2>
@@ -61,7 +72,9 @@ const CompostStandDataDisplay = () => {
           />
         )
       )}
-      <div></div>
+      {standsWithReports.length && (
+        <CompostStandChart stand={standsWithReports[10]} />
+      )}
     </div>
   );
 };

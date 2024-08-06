@@ -7,6 +7,26 @@ import { Provider } from 'react-redux';
 import { store } from './store/index';
 import Loader from './components/Loader';
 import Modal from './components/Modal';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 function App() {
   const [appDisplay, setAppDisplay] = useState<AppPage>('users');

@@ -1,4 +1,4 @@
-import CompostStandDataDisplay from './CompostStandDataDisplay';
+import CompostStandDataDisplay from './CompostStands/CompostStandDataDisplay';
 import { AppPage } from '../types/AppTypes';
 import EventsTab from './events/EventsTab';
 import UserTab from './user/UserTab';
