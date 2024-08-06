@@ -33,7 +33,7 @@ const appSlice = createSlice({
 
 export const selectIsModalVisible = (state: RootState) => state.appState.isModalVisible;
 export const selectModalText = (state: RootState) => state.appState.modalText;
-export const selectIsLoading = (state: RootState) => state.appState.loading;
+export const selectIsAppLoading = (state: RootState) => state.appState.loading;
 export const { setIsModalVisible, setModalText, setLoading } = appSlice.actions;
 
 export default appSlice.reducer;

@@ -62,15 +62,7 @@ const UserDataDisplay = () => {
         <span className='DataDisplay__key'>New users</span>
         <span className='DataDisplay__value'>{userData.newUserCount}</span>
       </div>
-      {/* TODO chart this */}
-      {/*<div className={ ' DataDisplay__property' }>*/}
-      {/*  <span className="DataDisplay__key">*/}
-      {/*   Transactions Per User*/}
-      {/*  </span>*/}
-      {/*  <span className="DataDisplay__value">*/}
-      {/*    { userData.transactionsPerUser }*/}
-      {/*  </span>*/}
-      {/*</div>*/}
+      <div className={' DataDisplay__property'}>
     </div>
   );
 };

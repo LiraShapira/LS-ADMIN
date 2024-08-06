@@ -9,7 +9,7 @@ const TransactionItem = ({ transaction }: { transaction: Transaction }) => {
   const purchaserIndex = recipientIndex === 0 ? 1 : 0;
   return (
     <div style={{ border: 'solid 1 black', borderWidth: 1 }}>
-      <div key={transaction.id}>
+      <div>
         <div>{transaction.amount}</div>
         <div>
           from: {users[recipientIndex].firstName}{' '}

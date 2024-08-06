@@ -1,4 +1,4 @@
-import { selectIsLoading } from '../store/appSlice';
+import { selectIsAppLoading } from '../store/appSlice';
 import { useAppSelector } from '../utils/hooks';
 
 interface LoaderProps {
@@ -6,11 +6,11 @@ interface LoaderProps {
 }
 
 const Loader = ({ children }: LoaderProps) => {
-  const loading = useAppSelector(selectIsLoading);
+  const appLoading = useAppSelector(selectIsAppLoading);
 
   return (
     <>
-      {loading && (
+      {appLoading && (
         <div className='overlay'>
           <div className='loader'></div>
         </div>

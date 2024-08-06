@@ -31,7 +31,7 @@ const UserTab = () => {
         dispatch(setIsModalVisible(true));
         throw new Error(e);
       });
-  }, []);
+  }, [dispatch]);
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
