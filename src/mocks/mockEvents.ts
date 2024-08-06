@@ -18,50 +18,13 @@ const futureDatePlusOneDay = new Date();
 futureDatePlusOneDay.setMonth(today.getMonth() + 1);
 futureDatePlusOneDay.setDate(today.getDate() + 1);
 
-
-export const mockTransaction: Transaction = {
-  recipientId: '1234355',
-  purchaserId: '1234',
-  category: Category.GROCERIES,
-  amount: 10,
-  createdAt: new Date('2023-07-05').toDateString(),
-  reason: 'bought a spade',
-  id: '123456',
-  isRequest: false,
-  users: [{ firstName: 'Bill', lastName: 'Withers' }]
-}
-
-export const mockTransaction2: Transaction = {
-  recipientId: '1234',
-  purchaserId: '1234355',
-  category: Category.GARDEN,
-  amount: 14,
-  createdAt: new Date('2023-07-06').toDateString(),
-  reason: 'bought seeds',
-  id: '1234567',
-  isRequest: false,
-  users: [{ firstName: 'Bill', lastName: 'Withers' }]
-}
-
-export const mockTransaction3: Transaction = {
-  recipientId: '1234',
-  purchaserId: '1234355',
-  category: Category.GROCERIES,
-  amount: 100,
-  createdAt: new Date('2023-07-08').toDateString(),
-  reason: 'בקשה ממירון גלברד',
-  id: '12345678',
-  isRequest: false,
-  users: [{ firstName: 'Bill', lastName: 'Withers' }]
-}
-
 export const mockUser: User = {
   firstName: 'Simon',
   lastName: 'Test',
   id: '1234',
   accountBalance: '154',
   createdAt: new Date('2023-07-05').toDateString(),
-  transactions: [mockTransaction, mockTransaction2, mockTransaction3],
+  transactions: [],
   phoneNumber: '123456789',
   role: UserRole.ADMIN,
   adminCompostStandId: null
@@ -73,10 +36,46 @@ export const mockUser2: User = {
   id: '1234355',
   accountBalance: '200',
   createdAt: new Date('2023-07-05').toDateString(),
-  transactions: [mockTransaction, mockTransaction2, mockTransaction3],
+  transactions: [],
   phoneNumber: '987654321',
   role: UserRole.BASIC,
   adminCompostStandId: null
+}
+
+export const mockTransaction: Transaction = {
+  recipientId: '1234355',
+  purchaserId: '1234',
+  category: Category.GROCERIES,
+  amount: 10,
+  createdAt: new Date('2023-07-05').toDateString(),
+  reason: 'bought a spade',
+  id: '123456',
+  isRequest: false,
+  users: [mockUser, mockUser2]
+}
+
+export const mockTransaction2: Transaction = {
+  recipientId: '1234',
+  purchaserId: '1234355',
+  category: Category.GARDEN,
+  amount: 14,
+  createdAt: new Date('2023-07-06').toDateString(),
+  reason: 'bought seeds',
+  id: '1234567',
+  isRequest: false,
+  users: [mockUser, mockUser2]
+}
+
+export const mockTransaction3: Transaction = {
+  recipientId: '1234',
+  purchaserId: '1234355',
+  category: Category.GROCERIES,
+  amount: 100,
+  createdAt: new Date('2023-07-08').toDateString(),
+  reason: 'בקשה ממירון גלברד',
+  id: '12345678',
+  isRequest: false,
+  users: [mockUser, mockUser2]
 }
 
 

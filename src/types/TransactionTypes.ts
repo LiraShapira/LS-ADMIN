@@ -1,3 +1,5 @@
+import { User } from "./UserTypes";
+
 export enum Category {
   GROCERIES = 'GROCERIES',
   GARDEN = 'GARDEN',
@@ -16,9 +18,6 @@ export interface Transaction {
   reason: string;
   isRequest: boolean;
   users: [
-    {
-      firstName: string;
-      lastName: string;
-    }
+    User, User
   ]
 }
