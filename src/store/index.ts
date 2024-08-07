@@ -2,12 +2,14 @@ import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import eventsSlice from './eventsSlice';
 import appSlice from './appSlice';
 import transactionsSlice from './transactionsSlice';
+import compostStandSlice from './compostStandSlice';
 
 export const store = configureStore({
   reducer: {
     eventState: eventsSlice,
     appState: appSlice,
-    transactionState: transactionsSlice
+    transactionState: transactionsSlice,
+    compostStandsState: compostStandSlice
   },
 });
 
