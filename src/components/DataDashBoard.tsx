@@ -1,4 +1,4 @@
-import CompostStandDataDisplay from './CompostStands/CompostStandDataDisplay';
+import CompostStandsTab from './CompostStands/CompostStandsTab';
 import { AppPage } from '../types/AppTypes';
 import EventsTab from './events/EventsTab';
 import UserTab from './user/UserTab';
@@ -12,7 +12,7 @@ const DataDashBoard = ({ currentPage }: DataDashBoardProps) => {
   return (
     <div className={'DataDashBoard'}>
       {currentPage === 'users' && <UserTab />}
-      {currentPage === 'compostStands' && <CompostStandDataDisplay />}
+      {currentPage === 'compostStands' && <CompostStandsTab />}
       {currentPage === 'events' && <EventsTab />}
       {currentPage === 'transactions' && <TransactionsTab />}
     </div>

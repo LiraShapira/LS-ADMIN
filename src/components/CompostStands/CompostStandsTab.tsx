@@ -28,6 +28,7 @@ const initialUserData: CompostStandDataDTO = {
 const CompostStandDataDisplay = () => {
   const [compostStandData, setCompostStandData] =
     useState<CompostStandDataDTO>(initialUserData);
+  const [isStandsListVisible, setIsStandsListVisible] = useState(true);
   const [period, setPeriod] = useState<number>(30);
   const dispatch = useAppDispatch();
   const standsWithReports = useAppSelector(selectReports);
@@ -53,7 +54,6 @@ const CompostStandDataDisplay = () => {
       });
   }, [period]);
 
-  console.log(standsWithReports);
   return (
     <div className={'DataDisplay'}>
       <h2 className={'DataDisplay__title'}>Compost Stand Data</h2>
@@ -64,14 +64,20 @@ const CompostStandDataDisplay = () => {
         onChange={(e) => setPeriod(parseInt(e.target.value))}
         min={0}
       />
-      {createCompostStandData(compostStandData.depositsWeightsByStands).map(
-        (compostStand) => (
-          <CompostStandDataItem
-            key={compostStand.id}
-            compostStand={compostStand}
-          />
-        )
+      {isStandsListVisible ? (
+        <button onClick={() => setIsStandsListVisible(false)}>Hide list</button>
+      ) : (
+        <button onClick={() => setIsStandsListVisible(true)}>Show List</button>
       )}
+      {isStandsListVisible &&
+        createCompostStandData(compostStandData.depositsWeightsByStands).map(
+          (compostStand) => (
+            <CompostStandDataItem
+              key={compostStand.id}
+              compostStand={compostStand}
+            />
+          )
+        )}
       {standsWithReports.length && (
         <CompostStandChart stand={standsWithReports[10]} />
       )}
