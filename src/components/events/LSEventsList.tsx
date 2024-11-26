@@ -14,7 +14,7 @@ const LSEventsList = ({ events }: { events: LSEvent[] }) => {
         if (isEditMode && LSEvent.id === selectedEvent.id) {
           return (
             <div
-              key={LSEvent.id}
+              key={`${LSEvent.id}-edit`}
               style={{ border: 'solid 2px black', margin: 8, padding: 4 }}
             >
               <EditEvent />
@@ -23,7 +23,7 @@ const LSEventsList = ({ events }: { events: LSEvent[] }) => {
         } else {
           return (
             <div
-              key={LSEvent.id}
+              key={`${LSEvent.id}-view`}
               style={{ border: 'solid 2px black', margin: 8, padding: 4 }}
             >
               <LSEventItem LSEvent={LSEvent} />

@@ -16,5 +16,18 @@ export type CompostStandName =
 export interface CompostStand {
   id: string;
   name: CompostStandName;
+  reports: CompostReport[];
 }
 
+export interface CompostReport {
+  date: string;
+  amount: string;
+  compostSmell?: boolean;
+  dryMatterPresent?: 'no' | 'some' | 'yes';
+  bugs?: boolean;
+  scalesProblem?: boolean;
+  full?: boolean;
+  cleanAndTidy?: boolean;
+  notes?: string;
+  compostStand: CompostStand
+}

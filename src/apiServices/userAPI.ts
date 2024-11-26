@@ -10,7 +10,7 @@ export const fetchUserData = async (params?: { period?: number }): Promise<ApiSe
   try {
     const response: Response = await fetch(urlString, {
       headers: {
-        'Content-Type': 'application/json', // Set the correct Content-Type header
+        'Content-Type': 'application/json',
       },
     })
     const JSONResponse = await response.json();

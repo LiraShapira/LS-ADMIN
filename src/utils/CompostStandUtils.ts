@@ -1,5 +1,5 @@
-import {CompostStandName} from "../types/CompostStandTypes";
-import {DepositsWeightsByStand} from "../types/ApiTypes";
+import { CompostStand, CompostStandName } from "../types/CompostStandTypes";
+import { DepositsWeightsByStand } from "../types/ApiTypes";
 
 export const standsIdToNameMap: Record<number, CompostStandName> = {
   2: 'hakaveret',
@@ -33,13 +33,18 @@ export const standsNameToIdMap: Record<CompostStandName, number> = {
   cafe_shapira: 14,
 };
 
-export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsByStand[]): DepositsWeightsByStand[] => {
+export interface CompostStandWithWeight extends CompostStand {
+  weight: number;
+}
+
+export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsByStand[]): CompostStandWithWeight[] => {
   return Object.entries(standsIdToNameMap).map(([id, name]) => {
     const compostStandDTO = depositsWeightsByStand.find(n => n.id === id);
-    const weight = compostStandDTO ? compostStandDTO.weight : 0;
+    const weight = compostStandDTO ? compostStandDTO.depositWeightSum : 0;
     return {
       id,
       name,
+      reports: [],
       weight
     }
   })

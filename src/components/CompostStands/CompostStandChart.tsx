@@ -3,7 +3,7 @@ import { CompostStand } from '../../types/CompostStandTypes';
 
 type ReportProperty =
   | 'bugs'
-  | 'cleanAndTidy'
+  | 'notCleanAndTidy'
   | 'full'
   | 'scalesProblem'
   | 'compostSmell'
@@ -11,10 +11,19 @@ type ReportProperty =
 
 type ReportDataOverTime = Record<ReportProperty, Record<string, number>>;
 
+const colors: Record<ReportProperty, string> = {
+  bugs: '#40E0D0',
+  notCleanAndTidy: '#6495ED',
+  full: '#DE3163',
+  scalesProblem: '#FFBF00',
+  compostSmell: '#DFFF00',
+  dryMatterPresent: '#800080',
+};
+
 const processData = (compostStand: CompostStand): ReportDataOverTime => {
   const conditions: ReportDataOverTime = {
     bugs: {},
-    cleanAndTidy: {},
+    notCleanAndTidy: {},
     full: {},
     scalesProblem: {},
     compostSmell: {},
@@ -26,7 +35,8 @@ const processData = (compostStand: CompostStand): ReportDataOverTime => {
 
     if (report.bugs) conditions.bugs[date] = (conditions.bugs[date] || 0) + 1;
     if (!report.cleanAndTidy)
-      conditions.cleanAndTidy[date] = (conditions.cleanAndTidy[date] || 0) + 1;
+      conditions.notCleanAndTidy[date] =
+        (conditions.notCleanAndTidy[date] || 0) + 1;
     if (report.full) conditions.full[date] = (conditions.full[date] || 0) + 1;
     if (report.scalesProblem)
       conditions.scalesProblem[date] =
@@ -54,21 +64,12 @@ const prepareDatasets = (conditions: ReportDataOverTime) => {
       label: key,
       data,
       fill: false,
-      borderColor: getRandomColor(),
+      borderColor: colors[key as ReportProperty],
       tension: 0.1,
     };
   });
 
   return { labels: dates, datasets };
-};
-
-const getRandomColor = (): string => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
 };
 
 interface CompostStandChartProps {

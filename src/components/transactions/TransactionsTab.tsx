@@ -33,17 +33,20 @@ const TransactionsTab = () => {
       });
   }, [dispatch, period]);
   return (
-    <div style={{ margin: 4 }}>
-      <div>PERIOD: {period} days</div>
-      <input
-        style={{ width: '50px' }}
-        defaultValue={30}
-        type={'number'}
-        onChange={(e) => setPeriod(parseInt(e.target.value))}
-        min={0}
-      />
-      <div>Transaction count: {transactions.length}</div>
-      <TransactionList transactions={transactions} />
+    <div style={{ display: 'flex', flexWrap: 'wrap', margin: 5 }}>
+      <div className={'DataDisplay'}>
+        <h1>Transactions List</h1>
+        <div>PERIOD: {period} days</div>
+        <input
+          style={{ width: '50px' }}
+          defaultValue={30}
+          type={'number'}
+          onChange={(e) => setPeriod(parseInt(e.target.value))}
+          min={0}
+        />
+        <div>Transaction count: {transactions.length}</div>
+        <TransactionList transactions={transactions} />
+      </div>
     </div>
   );
 };

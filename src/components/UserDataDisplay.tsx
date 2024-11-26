@@ -10,6 +10,9 @@ const initialUserData = {
   depositsPerUser: [],
   period: 0,
   balanceCounts: 0,
+  totalCoins: 0,
+  averageNumberOfDepositsPerUser: 0,
+  totalNumberOfDeposits: 0,
 };
 
 const UserDataDisplay = () => {
@@ -63,6 +66,17 @@ const UserDataDisplay = () => {
         <span className='DataDisplay__value'>{userData.newUserCount}</span>
       </div>
       <div className={' DataDisplay__property'}>
+        <span className='DataDisplay__key'>Average deposits per user</span>
+        <span className='DataDisplay__value'>
+          {userData.averageNumberOfDepositsPerUser}
+        </span>
+      </div>
+      <div className={' DataDisplay__property'}>
+        <span className='DataDisplay__key'>Total number of deposits</span>
+        <span className='DataDisplay__value'>
+          {userData.totalNumberOfDeposits}
+        </span>
+      </div>
     </div>
   );
 };

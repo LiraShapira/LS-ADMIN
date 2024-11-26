@@ -4,6 +4,7 @@ import { SuccessApiResponse } from '../types/ApiTypes';
 import { LSEvent } from '../types/EventTypes';
 import { deleteEventInDB, fetchLSEventsData, saveEventToDatabase, updateEventInDatabase } from '../apiServices/EventsApi';
 import { mockEvent1 } from '../mocks/mockEvents';
+import { setLoading } from './appSlice';
 
 interface EventsState {
   events: LSEvent[];
@@ -62,7 +63,8 @@ export const deleteEvent = createAsyncThunk<
   SuccessApiResponse<LSEvent[]>,
   { id: string },
   { state: RootState }>
-  ('eventsSlice/deleteEvent', async ({ id }): Promise<SuccessApiResponse<LSEvent[]>> => {
+  ('eventsSlice/deleteEvent', async ({ id }, { dispatch }): Promise<SuccessApiResponse<LSEvent[]>> => {
+    dispatch(setLoading(true))
     const response = await deleteEventInDB({ id });
     if (!('data' in response)) {
       throw new Error(response.message);

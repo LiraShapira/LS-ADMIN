@@ -12,7 +12,10 @@ export interface UserData {
   averageTransactionsPerUser: number;
   depositsPerUser: number[];
   period: number;
-  balanceCounts: any
+  totalCoins: number;
+  balanceCounts: any;
+  averageNumberOfDepositsPerUser: number;
+  totalNumberOfDeposits: number;
 }
 
 export interface User {
