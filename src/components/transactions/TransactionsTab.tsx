@@ -18,19 +18,19 @@ const TransactionsTab = () => {
   useEffect(() => {
     dispatch(setLoading(true));
     dispatch(loadTransactionStats({ period }))
-      .unwrap()
-      .then((response) => {
-        if (response instanceof Error) {
-          throw new Error(response.message);
-        }
-        dispatch(setLoading(false));
-      })
-      .catch((e) => {
-        dispatch(setModalText(e.message));
-        dispatch(setIsModalVisible(true));
-        dispatch(setLoading(false));
-        throw new Error(e);
-      });
+    .unwrap()
+    .then((response) => {
+      if (response instanceof Error) {
+        throw new Error(response.message);
+      }
+      dispatch(setLoading(false));
+    })
+    .catch((e) => {
+      dispatch(setModalText(e.message));
+      dispatch(setIsModalVisible(true));
+      dispatch(setLoading(false));
+      throw new Error(e);
+    });
   }, [dispatch, period]);
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', margin: 5 }}>
