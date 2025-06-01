@@ -1,90 +1,115 @@
-import { Line } from 'react-chartjs-2';
-import { CompostStand } from '../../types/CompostStandTypes';
+import { useState, useEffect } from 'react';
+import {
+  ResponsiveContainer,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
+import { fetchCompostReportData } from '../../apiServices/CompostStandAPI';
 
-type ReportProperty =
-  | 'bugs'
-  | 'notCleanAndTidy'
-  | 'full'
-  | 'scalesProblem'
-  | 'compostSmell'
-  | 'dryMatterPresent';
-
-type ReportDataOverTime = Record<ReportProperty, Record<string, number>>;
-
-const colors: Record<ReportProperty, string> = {
-  bugs: '#40E0D0',
-  notCleanAndTidy: '#6495ED',
-  full: '#DE3163',
-  scalesProblem: '#FFBF00',
-  compostSmell: '#DFFF00',
-  dryMatterPresent: '#800080',
-};
-
-const processData = (compostStand: CompostStand): ReportDataOverTime => {
-  const conditions: ReportDataOverTime = {
-    bugs: {},
-    notCleanAndTidy: {},
-    full: {},
-    scalesProblem: {},
-    compostSmell: {},
-    dryMatterPresent: {},
-  };
-
-  compostStand.reports.forEach((report) => {
-    const date = new Date(report.date).toLocaleDateString();
-
-    if (report.bugs) conditions.bugs[date] = (conditions.bugs[date] || 0) + 1;
-    if (!report.cleanAndTidy)
-      conditions.notCleanAndTidy[date] =
-        (conditions.notCleanAndTidy[date] || 0) + 1;
-    if (report.full) conditions.full[date] = (conditions.full[date] || 0) + 1;
-    if (report.scalesProblem)
-      conditions.scalesProblem[date] =
-        (conditions.scalesProblem[date] || 0) + 1;
-    if (report.compostSmell)
-      conditions.compostSmell[date] = (conditions.compostSmell[date] || 0) + 1;
-    if (report.dryMatterPresent === 'no')
-      conditions.dryMatterPresent[date] =
-        (conditions.dryMatterPresent[date] || 0) + 1;
-  });
-
-  return conditions;
-};
-
-const prepareDatasets = (conditions: ReportDataOverTime) => {
-  const dates = Array.from(
-    new Set(Object.values(conditions).flatMap(Object.keys))
-  ).sort();
-
-  const datasets = Object.keys(conditions).map((key) => {
-    const data = dates.map(
-      (date) => conditions[key as ReportProperty][date] || 0
-    );
-    return {
-      label: key,
-      data,
-      fill: false,
-      borderColor: colors[key as ReportProperty],
-      tension: 0.1,
-    };
-  });
-
-  return { labels: dates, datasets };
-};
-
-interface CompostStandChartProps {
-  stand: CompostStand;
+export interface ReportBooleanProperty {
+  true: number;
+  false: number;
+  missing: number;
 }
 
-const CompostStandChart = ({ stand }: CompostStandChartProps) => {
-  const reportDataOverTime = processData(stand);
-  const chartData = prepareDatasets(reportDataOverTime);
+export interface StandStats {
+  compostStandId: number;
+  standName: string;
+  total: number;
+  compostSmell: ReportBooleanProperty;
+  dryMatterPresent: ReportBooleanProperty;
+  cleanAndTidy: ReportBooleanProperty;
+  full: ReportBooleanProperty;
+  scalesProblem: ReportBooleanProperty;
+  bugs: ReportBooleanProperty;
+  notes: Record<string, number>;
+}
+
+export default function CompostReportStats({ period = 30 }: { period?: number }) {
+  const [stats, setStats] = useState<StandStats[]>([]);
+  const [openMap, setOpenMap] = useState<Record<number, boolean>>({});
+
+  const toggleStand = (id: number) => {
+    setOpenMap((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  useEffect(() => {
+    fetchCompostReportData({ period })
+      .then((response) => {
+        if (response instanceof Error) {
+          throw new Error(response.message);
+        }
+        setStats(response.data)
+      })
+      .catch(console.error);
+  }, [period]);
 
   return (
     <div>
-      <Line data={chartData} />
-    </div>
-  );
-};
+      <h2>Compost Report Stats (last {period} days)</h2>
+      {stats.map((standStatsObject) => (
+        <div key={standStatsObject.compostStandId} style={{ marginBottom: '1.5rem' }}>
+          <h3
+            onClick={() => toggleStand(standStatsObject.compostStandId)}
+            style={{ cursor: 'pointer', userSelect: 'none' }}
+          >
+            {openMap[standStatsObject.compostStandId] ? '▼' : '▶'} {standStatsObject.standName}
+          </h3>
+          {openMap[standStatsObject.compostStandId] && (
+            <>
+              <div>
+                {(['cleanAndTidy', 'full', 'scalesProblem', 'bugs', 'compostSmell'] as const).map(prop => {
+                  if (standStatsObject[prop].missing === standStatsObject.total) {
+                    return (
+                      <div key={prop} style={{ width: '30%' }}>
+                        <h4>{prop}</h4>
+                        <p>No data available</p>
+                      </div>
+                    );
+                  }
+                  const data = [
+                    { name: 'true', value: (standStatsObject)[prop].true },
+                    { name: 'false', value: (standStatsObject)[prop].false }
+                  ];
+                  const colors = data.map(entry => {
+                    // cleanAndTidy is "good": true=green, false=red
+                    if (prop === 'cleanAndTidy') return entry.name === 'true' ? 'green' : 'red';
+                    // others are "bad" props: true=red, false=green
+                    return entry.name === 'true' ? 'red' : 'green';
+                  });
 
-export default CompostStandChart;
+                  return (
+                    <div key={prop} style={{ width: '30%' }}>
+                      <h4>{prop}</h4>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <PieChart>
+                          <Pie
+                            dataKey="value"
+                            data={data}
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={60}
+                            label={(entry) => `${entry.name}: ${entry.value}`}
+                          >
+                            {data.map((_, idx) => (
+                              <Cell key={idx} fill={colors[idx]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      ))
+      }
+    </div >
+  );
+}

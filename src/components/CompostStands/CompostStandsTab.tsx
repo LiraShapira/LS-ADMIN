@@ -3,13 +3,12 @@ import { CompostStandDataDTO } from '../../types/ApiTypes';
 import { fetchCompostStandData } from '../../apiServices/CompostStandAPI';
 import { createCompostStandData } from '../../utils/CompostStandUtils';
 import CompostStandDataItem from './CompostStandDataItem';
-import { useAppDispatch, useAppSelector } from '../../utils/hooks';
+import { useAppDispatch } from '../../utils/hooks';
 import {
   setIsModalVisible,
   setLoading,
   setModalText,
 } from '../../store/appSlice';
-import { loadReportStats, selectReports } from '../../store/compostStandSlice';
 import CompostStandChart from './CompostStandChart';
 
 const initialUserData: CompostStandDataDTO = {
@@ -31,11 +30,9 @@ const CompostStandDataDisplay = () => {
   const [isStandsListVisible, setIsStandsListVisible] = useState(true);
   const [period, setPeriod] = useState<number>(30);
   const dispatch = useAppDispatch();
-  const standsWithReports = useAppSelector(selectReports);
 
   useEffect(() => {
     dispatch(setLoading(true));
-    dispatch(loadReportStats({ period }));
     // TODO debounce
     fetchCompostStandData({
       period,
@@ -78,9 +75,7 @@ const CompostStandDataDisplay = () => {
             />
           )
         )}
-      {standsWithReports.length && (
-        <CompostStandChart stand={standsWithReports[10]} />
-      )}
+      <CompostStandChart period={period} />
     </div>
   );
 };

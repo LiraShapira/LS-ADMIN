@@ -7,7 +7,7 @@ interface CompostStandDataItemProp {
 const CompostStandDataItem = ({ compostStand }: CompostStandDataItemProp) => {
   return (
     <div style={{ padding: '10px 0' }}>
-      <div style={{ display: 'flex' }}>
+      <div>
         <span>id:</span>
         <span>{compostStand.id}</span>
       </div>

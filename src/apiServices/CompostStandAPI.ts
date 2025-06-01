@@ -1,6 +1,6 @@
 import { SERVER_URL } from "./config";
 import { ApiServiceReturnType, CompostStandDataDTO } from "../types/ApiTypes";
-import { CompostReport, CompostStand } from "../types/CompostStandTypes";
+import { StandStats } from "../components/CompostStands/CompostStandChart";
 
 export const fetchCompostStandData = async (params?: { period?: number }): Promise<ApiServiceReturnType<CompostStandDataDTO>> => {
   let urlString = `${SERVER_URL}/compostStandStats?`
@@ -24,7 +24,7 @@ export const fetchCompostStandData = async (params?: { period?: number }): Promi
   }
 }
 
-export const fetchCompostReportData = async (params?: { period?: number }): Promise<ApiServiceReturnType<{ reports: CompostStand[] }>> => {
+export const fetchCompostReportData = async (params?: { period?: number }): Promise<ApiServiceReturnType<StandStats[]>> => {
   let urlString = `${SERVER_URL}/compostReportStats?`
   if (params?.period) {
     urlString = urlString + `period=${params.period}`;
