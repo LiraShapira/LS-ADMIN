@@ -12,7 +12,7 @@ import {
 
 const UserTab = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [userListOpen, setUserListOpen] = useState<boolean>(true);
+  // const [userListOpen, setUserListOpen] = useState<boolean>(true);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -53,23 +53,22 @@ const UserTab = () => {
       <UserDataDisplay />
       <div>
         <h1 style={{ textAlign: 'center' }}>Users</h1>
-        <button
+        {/* <button
           style={{ width: 400, margin: 2, border: '2px solid black' }}
           onClick={() => setUserListOpen((p) => !p)}
         >
           {userListOpen ? 'Hide User List' : 'Show User List'}
-        </button>
-        {userListOpen &&
-          <input
-            type="text"
-            placeholder="Search users..."
-            style={{ width: 390, margin: '8px 0', padding: 4 }}
-            onChange={(e) => onFilterUsers(e.target.value)}
-          />
-        }
-        {userListOpen && (
-          <UserItemList users={users.filter((user: any) => !user._hidden)} />
-        )}
+        </button> */}
+        <input
+          type="text"
+          placeholder="Search users..."
+          style={{ width: 390, margin: '8px 0', padding: 4 }}
+          onChange={(e) => onFilterUsers(e.target.value)}
+        />
+
+
+        <UserItemList users={users.filter((user: any) => !user._hidden)} />
+
       </div>
     </div>
   );
