@@ -33,17 +33,43 @@ const UserTab = () => {
       });
   }, [dispatch]);
 
+  const onFilterUsers = (search: string) => {
+    const lowerSearch = search.toLowerCase();
+    setUsers((prevUsers) =>
+      prevUsers.map((user) => ({
+        ...user,
+        _hidden: !(
+          user.firstName.toLowerCase().includes(lowerSearch) ||
+          user.lastName.toLowerCase().includes(lowerSearch) ||
+          user.email?.toLowerCase().includes(lowerSearch) ||
+          user.phoneNumber.includes(lowerSearch)
+        ),
+      }))
+    );
+  }
+
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       <UserDataDisplay />
       <div>
+        <h1 style={{ textAlign: 'center' }}>Users</h1>
         <button
           style={{ width: 400, margin: 2, border: '2px solid black' }}
           onClick={() => setUserListOpen((p) => !p)}
         >
-          <h2>User List {userListOpen ? '🔽' : '▶'}</h2>
+          {userListOpen ? 'Hide User List' : 'Show User List'}
         </button>
-        {userListOpen && <UserItemList users={users} />}
+        {userListOpen &&
+          <input
+            type="text"
+            placeholder="Search users..."
+            style={{ width: 390, margin: '8px 0', padding: 4 }}
+            onChange={(e) => onFilterUsers(e.target.value)}
+          />
+        }
+        {userListOpen && (
+          <UserItemList users={users.filter((user: any) => !user._hidden)} />
+        )}
       </div>
     </div>
   );
