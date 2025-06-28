@@ -33,19 +33,36 @@ export const standsNameToIdMap: Record<CompostStandName, number> = {
   cafe_shapira: 14,
 };
 
-export interface CompostStandWithWeight extends CompostStand {
+export interface CompostStandWithDepositData extends CompostStand {
   weight: number;
+  averageDepositWeight: number;
+  depositCount: number;
 }
 
-export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsByStand[]): CompostStandWithWeight[] => {
+export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsByStand[]): CompostStandWithDepositData[] => {
   return Object.entries(standsIdToNameMap).map(([id, name]) => {
     const compostStandDTO = depositsWeightsByStand.find(n => n.id === id);
-    const weight = compostStandDTO ? compostStandDTO.depositWeightSum : 0;
-    return {
-      id,
-      name,
-      reports: [],
-      weight
+    if (!compostStandDTO || !compostStandDTO.depositWeightSum) {
+      return {
+        id,
+        name,
+        reports: [],
+        weight: 0,
+        averageDepositWeight: 0,
+        depositCount: 0
+      }
+    } else {
+      const weight = compostStandDTO.depositWeightSum;
+      const averageDepositWeight = compostStandDTO.averageDepositWeight;
+      const depositCount = compostStandDTO.depositCount;
+      return {
+        id,
+        name,
+        reports: [],
+        weight,
+        averageDepositWeight,
+        depositCount
+      }
     }
   })
 }

@@ -40,7 +40,6 @@ button {
   text-decoration: none;
   color: var(--text);
   font-family: sans-serif;
-  background-color: var(--tint);
   cursor: pointer;
   text-align: center;
   transition: background 150ms ease-in-out, transform 150ms ease;
@@ -104,10 +103,24 @@ button {
   }
 }
 
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (max-width: 600px) {
   .NavBar {
     display: flex;
     flex-direction: column;
+  }
+  .mobile-only {
+    display: block;
+  }
+  .desktop-only {
+    display: none;
   }
 }

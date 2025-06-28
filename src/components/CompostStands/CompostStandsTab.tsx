@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CompostStandDataDTO } from '../../types/ApiTypes';
 import { fetchCompostStandData } from '../../apiServices/CompostStandAPI';
-import { createCompostStandData } from '../../utils/CompostStandUtils';
-import CompostStandDataItem from './CompostStandDataItem';
 import { useAppDispatch } from '../../utils/hooks';
 import {
   setIsModalVisible,
@@ -10,6 +8,7 @@ import {
   setModalText,
 } from '../../store/appSlice';
 import CompostStandChart from './CompostStandChart';
+import { CompostStandTable } from './CompostStandTable';
 
 const initialUserData: CompostStandDataDTO = {
   depositsWeightsByStands: [
@@ -61,20 +60,22 @@ const CompostStandDataDisplay = () => {
         onChange={(e) => setPeriod(parseInt(e.target.value))}
         min={0}
       />
-      {isStandsListVisible ? (
-        <button onClick={() => setIsStandsListVisible(false)}>Hide list</button>
-      ) : (
-        <button onClick={() => setIsStandsListVisible(true)}>Show List</button>
-      )}
-      {isStandsListVisible &&
-        createCompostStandData(compostStandData.depositsWeightsByStands).map(
-          (compostStand) => (
-            <CompostStandDataItem
-              key={compostStand.id}
-              compostStand={compostStand}
-            />
-          )
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>Compost Stand Table</h1>
+        {isStandsListVisible ? (
+          <button onClick={() => setIsStandsListVisible(false)}>Hide list</button>
+        ) : (
+          <button onClick={() => setIsStandsListVisible(true)}>Show List</button>
         )}
+      </div>
+      {isStandsListVisible &&
+        <>
+
+          <span className='mobile-only'>Some data may not be viewable on mobile view</span>
+
+          <CompostStandTable compostStandData={compostStandData} />
+        </>
+      }
       <CompostStandChart period={period} />
     </div>
   );

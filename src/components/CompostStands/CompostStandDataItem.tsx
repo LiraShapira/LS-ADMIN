@@ -1,22 +1,22 @@
-import { CompostStandWithWeight } from '../../utils/CompostStandUtils';
+import { CompostStandWithDepositData } from '../../utils/CompostStandUtils';
 
 interface CompostStandDataItemProp {
-  compostStand: CompostStandWithWeight;
+  compostStand: CompostStandWithDepositData;
 }
-
 const CompostStandDataItem = ({ compostStand }: CompostStandDataItemProp) => {
   return (
-    <div style={{ padding: '10px 0' }}>
-      <div>
-        <span>id:</span>
-        <span>{compostStand.id}</span>
-      </div>
-      <div>
-        <span>name:</span>
-        <span>{compostStand.name}</span>
-      </div>
-      <div>deposit weight: {compostStand.weight} kg</div>
-    </div>
+    <tr>
+      {/* <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{compostStand.id}</td> */}
+      <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+        <span style={{ textAlign: 'left', display: 'block' }}>{compostStand.name}</span></td>
+      <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{compostStand.weight} kg</td>
+      <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+        {compostStand.depositCount}
+      </td>
+      <td className='desktop-only' style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+        {compostStand.averageDepositWeight} kg
+      </td>
+    </tr >
   );
 };
 
