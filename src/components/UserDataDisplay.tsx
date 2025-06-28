@@ -1,22 +1,11 @@
 import { useEffect, useState } from 'react';
 import { fetchUserData } from '../apiServices/userAPI';
 import { UserData } from '../types/UserTypes';
+import { convertUserData } from '../utils/UserDataUtils';
 
-const initialUserData = {
-  userCount: 0,
-  newUserCount: 0,
-  transactionsPerUser: [],
-  averageTransactionsPerUser: 0,
-  depositsPerUser: [],
-  period: 0,
-  balanceCounts: 0,
-  totalCoins: 0,
-  averageNumberOfDepositsPerUser: 0,
-  totalNumberOfDeposits: 0,
-};
 
 const UserDataDisplay = () => {
-  const [userData, setUserData] = useState<UserData>(initialUserData);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [period, setPeriod] = useState<number>(30);
 
   useEffect(() => {
@@ -28,13 +17,21 @@ const UserDataDisplay = () => {
         if (response instanceof Error) {
           throw new Error(response.message);
         }
-        setUserData(response.data);
+        if (!response.data) {
+          throw new Error('No data received from server');
+        }
+        if (response.data instanceof Array) {
+          setUserData(convertUserData(response.data));
+        }
       })
       .catch((e) => {
         throw new Error(e);
       });
   }, [period]);
 
+  if (!userData) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className={'DataDisplay'}>
       <h2 className={'DataDisplay__title'}>User Data</h2>
@@ -53,29 +50,29 @@ const UserDataDisplay = () => {
         onChange={(e) => setPeriod(parseInt(e.target.value))}
         min={0}
       />
+      <div className={' DataDisplay__property'}>
+        <span className='DataDisplay__key'>Number of deposits</span>
+        <span className='DataDisplay__value'>
+          {userData.numberOfDeposits || 0}
+        </span>
+      </div>
+      <div className={' DataDisplay__property'}>
+        <span className='DataDisplay__key'>Average Number of Deposits for active users</span>
+        <span className='DataDisplay__value'>
+          {userData.averageNumberOfDepositsPerUser ? userData.averageNumberOfDepositsPerUser.toFixed(2) : 0}
+        </span>
+      </div>
       <div className={'DataDisplay__property'}>
         <span className='DataDisplay__key'>
           Average transactions per user:{' '}
         </span>
         <span className='DataDisplay__value'>
-          {userData.averageTransactionsPerUser}
+          {userData.averageTransactionsPerUser.toFixed(2)}
         </span>
       </div>
       <div className={' DataDisplay__property'}>
         <span className='DataDisplay__key'>New users</span>
         <span className='DataDisplay__value'>{userData.newUserCount}</span>
-      </div>
-      <div className={' DataDisplay__property'}>
-        <span className='DataDisplay__key'>Average deposits per user</span>
-        <span className='DataDisplay__value'>
-          {userData.averageNumberOfDepositsPerUser}
-        </span>
-      </div>
-      <div className={' DataDisplay__property'}>
-        <span className='DataDisplay__key'>Total number of deposits</span>
-        <span className='DataDisplay__value'>
-          {userData.totalNumberOfDeposits}
-        </span>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import { SERVER_URL } from "./config";
 import { ApiServiceReturnType } from "../types/ApiTypes";
-import { User, UserData } from "../types/UserTypes";
+import { User, UserDataDTO } from "../types/UserTypes";
 
-export const fetchUserData = async (params?: { period?: number }): Promise<ApiServiceReturnType<UserData>> => {
+export const fetchUserData = async (params?: { period?: number }): Promise<ApiServiceReturnType<UserDataDTO>> => {
   let urlString = `${SERVER_URL}/userStats?`
   if (params?.period) {
     urlString = urlString + `period=${params.period}`;

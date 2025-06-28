@@ -5,17 +5,26 @@ export enum UserRole {
   BASIC = 'basic'
 }
 
-export interface UserData {
-  userCount: number;
-  newUserCount: number;
-  transactionsPerUser: number[];
+export interface BalanceCount {
+  balance: number;
+  count: number;
+}
+
+export interface UserDataDTO {
   averageTransactionsPerUser: number;
+  balanceCounts: BalanceCount[];
   depositsPerUser: number[];
+  newUserCount: number;
   period: number;
   totalCoins: number;
-  balanceCounts: any;
+  transactionsPerUser: number[];
+  userCount: number;
+}
+
+export interface UserData extends UserDataDTO {
+  numberOfDeposits: number;
+  numberOfTransactions: number;
   averageNumberOfDepositsPerUser: number;
-  totalNumberOfDeposits: number;
 }
 
 export interface User {
