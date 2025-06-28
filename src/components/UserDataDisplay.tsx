@@ -20,9 +20,7 @@ const UserDataDisplay = () => {
         if (!response.data) {
           throw new Error('No data received from server');
         }
-        if (response.data instanceof Array) {
-          setUserData(convertUserData(response.data));
-        }
+        setUserData(convertUserData(response.data));
       })
       .catch((e) => {
         throw new Error(e);
