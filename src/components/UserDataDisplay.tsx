@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { fetchUserData } from '../apiServices/userAPI';
 import { UserData } from '../types/UserTypes';
 import { convertUserData } from '../utils/UserDataUtils';
+import PeriodSlider from './PeriodSlider';
 
 
 const UserDataDisplay = () => {
@@ -41,13 +42,7 @@ const UserDataDisplay = () => {
           <b>{userData.userCount}</b>
         </span>
       </div>
-      <div>PERIOD: {period} days</div>
-      <input
-        defaultValue={30}
-        type={'number'}
-        onChange={(e) => setPeriod(parseInt(e.target.value))}
-        min={0}
-      />
+      <PeriodSlider value={period} onChange={setPeriod} />
       <div className={' DataDisplay__property'}>
         <span className='DataDisplay__key'>Number of deposits</span>
         <span className='DataDisplay__value'>
