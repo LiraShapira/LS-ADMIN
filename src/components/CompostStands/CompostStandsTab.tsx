@@ -9,6 +9,7 @@ import {
 } from '../../store/appSlice';
 import CompostStandChart from './CompostStandChart';
 import { CompostStandTable } from './CompostStandTable';
+import PeriodSlider from '../PeriodSlider';
 
 const initialUserData: CompostStandDataDTO = {
   depositsWeightsByStands: [
@@ -53,13 +54,7 @@ const CompostStandDataDisplay = () => {
   return (
     <div className={'DataDisplay'}>
       <h2 className={'DataDisplay__title'}>Compost Stand Data</h2>
-      <div>PERIOD: {period} days</div>
-      <input
-        defaultValue={30}
-        type={'number'}
-        onChange={(e) => setPeriod(parseInt(e.target.value))}
-        min={0}
-      />
+      <PeriodSlider value={period} onChange={setPeriod} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Compost Stand Table</h1>
         {isStandsListVisible ? (
