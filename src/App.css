@@ -18,6 +18,7 @@ body {
   background-color: var(--background);
   min-height: 100vh;
   color: var(--text);
+  padding-top: 56px; /* adjust to NavBar height */
 }
 
 .App-link {
@@ -30,6 +31,24 @@ body {
   align-items: center;
   flex-direction: row;
   background: #d6fade;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s;
+  will-change: transform;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.NavBar--hidden {
+  transform: translateY(-100%);
+  box-shadow: none;
+}
+
+.NavBar--visible {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 button {
@@ -56,6 +75,42 @@ button {
   color: black;
   background-color: #ffffff;
   font-weight: 700;
+}
+
+.NavBar__hamburger {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1200;
+}
+.NavBar__hamburger span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  margin: 3px 0;
+  background: #333;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.NavBar__menu {
+  display: none;
+  flex-direction: row;
+  position: absolute;
+  top: 56px;
+  left: 0;
+  right: 0;
+  background: #d6fade;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 1200;
+  padding: 0.5rem 0;
+}
+.NavBar__menu--open {
+  display: flex;
 }
 
 .DataDashBoard {
@@ -94,6 +149,20 @@ button {
   animation: spin 2s linear infinite;
 }
 
+input[type="range"]:focus {
+  outline: none;
+}
+ 
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background-color: #555;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -108,19 +177,27 @@ button {
 }
 
 .desktop-only {
-  display: block;
+  display: flex;
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (max-width: 600px) {
   .NavBar {
-    display: flex;
-    flex-direction: column;
-  }
-  .mobile-only {
-    display: block;
+    flex-direction: row;
+    height: 56px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1100;
   }
   .desktop-only {
-    display: none;
+    display: flex !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+  .NavBar__menu {
+    flex-direction: column;
   }
 }

@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { AppPage } from '../types/AppTypes';
-const classNames = require('classnames');
+import classNames from 'classnames';
+import { useIsMobile } from '../utils/hooks';
 
 interface NavBarProps {
   currentPage: AppPage;
@@ -7,15 +9,37 @@ interface NavBarProps {
 }
 
 const NavBar = ({ currentPage, setCurrentPage }: NavBarProps) => {
+  const [visible, setVisible] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const lastScrollY = useRef(0);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 10) {
+        setVisible(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        setVisible(true);
+      } else if (currentScrollY > lastScrollY.current) {
+        setVisible(false);
+        setMenuOpen(false);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const onClick = (page: AppPage) => {
     setCurrentPage(page);
+    setMenuOpen(false);
   };
 
-  return (
-    <div className={'NavBar'}>
+  const navButtons = (
+    <>
       <button
         onClick={() => onClick('users')}
-        // className={ currentPage === 'users' ? 'NavBar__selected' : '' }>
         className={classNames('NavBar__tab', {
           NavBar__selected: currentPage === 'users',
         })}
@@ -46,6 +70,36 @@ const NavBar = ({ currentPage, setCurrentPage }: NavBarProps) => {
       >
         Events
       </button>
+    </>
+  );
+
+  return (
+    <div
+      className={classNames('NavBar', {
+        'NavBar--hidden': !visible,
+        'NavBar--visible': visible,
+      })}
+    >
+      {isMobile && (
+        <>
+          <div
+            className="NavBar__hamburger"
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div
+            className={classNames('NavBar__menu', {
+              'NavBar__menu--open': menuOpen,
+            })}
+          >
+            {navButtons}
+          </div>
+        </>
+      )}
+      {!isMobile && navButtons}
     </div>
   );
 };

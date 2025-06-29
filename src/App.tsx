@@ -36,7 +36,7 @@ function App() {
       <Loader>
         <Modal>
           <div className='App'>
-            <div className='App-header'>
+            <div>
               <NavBar currentPage={appDisplay} setCurrentPage={setAppDisplay} />
               <DataDashBoard currentPage={appDisplay} />
             </div>
