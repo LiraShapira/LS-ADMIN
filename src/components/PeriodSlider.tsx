@@ -20,8 +20,7 @@ const PeriodSlider = ({ value, onChange, min = 1, max = 365 }: PeriodSliderProps
   return (
     <div style={{ margin: '10px 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-        <span>{formatDate(startDate)}</span>
-        <span>{formatDate(today)} (Today)</span>
+        <span>Date Span: {formatDate(startDate)} -{formatDate(today)} (Today)</span>
       </div>
       <input
         type="range"
@@ -29,7 +28,7 @@ const PeriodSlider = ({ value, onChange, min = 1, max = 365 }: PeriodSliderProps
         max={max}
         value={value}
         onChange={handleChange}
-        style={{ width: '100%' }}
+        style={{ width: '100%', direction: 'rtl' }}
       />
       <div style={{ textAlign: 'center', marginTop: 4 }}>{value} days</div>
     </div>
