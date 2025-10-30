@@ -8,6 +8,7 @@ import PeriodSlider from './PeriodSlider';
 const UserDataDisplay = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [period, setPeriod] = useState<number>(30);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // TODO debounce
@@ -16,17 +17,37 @@ const UserDataDisplay = () => {
     })
       .then((response) => {
         if (response instanceof Error) {
-          throw new Error(response.message);
+          console.error('Error fetching user data:', response.message);
+          setError(response.message);
+          return;
         }
         if (!response.data) {
-          throw new Error('No data received from server');
+          console.error('No data received from server');
+          setError('No data received from server');
+          return;
         }
         setUserData(convertUserData(response.data));
+        setError(null);
       })
       .catch((e) => {
-        throw new Error(e);
+        console.error('Error in UserDataDisplay:', e);
+        setError('An error occurred while fetching data');
       });
   }, [period]);
+
+  if (error) {
+    return (
+      <div className={'DataDisplay'}>
+        <h2 className={'DataDisplay__title'}>User Data</h2>
+        <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
+          <p>Error: {error}</p>
+          <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+            The userStats endpoint is not yet implemented on the server.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!userData) {
     return <div>Loading...</div>;

@@ -17,6 +17,9 @@ export const fetchUserData = async (params?: { period?: number }): Promise<ApiSe
     if (response.status === 400) {
       throw new Error(JSONResponse.error);
     }
+    if (response.status === 501) {
+      throw new Error(JSONResponse.error || 'Endpoint not yet implemented');
+    }
 
     return { data: JSONResponse, status: response.status };
   } catch (e: any) {

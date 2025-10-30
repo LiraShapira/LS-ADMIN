@@ -1,16 +1,16 @@
 import { UserData, UserDataDTO } from "../types/UserTypes";
 
 export const convertUserData = (userData: UserDataDTO): UserData => {
-    const numberOfDeposits = userData.depositsPerUser.length
-    const numberOfTransactions = userData.transactionsPerUser.length;
-    const averageNumberOfDepositsPerUser = userData.depositsPerUser.reduce((acc, curr) => acc + curr, 0) / userData.userCount || 0;
+    const numberOfDeposits = userData.depositsPerUser?.length || 0;
+    const numberOfTransactions = userData.transactionsPerUser?.length || 0;
+    const averageNumberOfDepositsPerUser = userData.depositsPerUser?.reduce((acc, curr) => acc + curr, 0) / (userData.userCount || 1) || 0;
 
     return {
         userCount: userData.userCount,
         newUserCount: userData.newUserCount,
-        transactionsPerUser: userData.transactionsPerUser,
+        transactionsPerUser: userData.transactionsPerUser || [],
         averageTransactionsPerUser: userData.averageTransactionsPerUser,
-        depositsPerUser: userData.depositsPerUser,
+        depositsPerUser: userData.depositsPerUser || [],
         period: userData.period,
         totalCoins: userData.totalCoins,
         balanceCounts: userData.balanceCounts,

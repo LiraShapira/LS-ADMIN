@@ -41,7 +41,7 @@ export interface CompostStandWithDepositData extends CompostStand {
 
 export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsByStand[]): CompostStandWithDepositData[] => {
   return Object.entries(standsIdToNameMap).map(([id, name]) => {
-    const compostStandDTO = depositsWeightsByStand.find(n => n.id === id);
+    const compostStandDTO = depositsWeightsByStand.find(n => Number(n.id) === Number(id));
     if (!compostStandDTO || !compostStandDTO.depositWeightSum) {
       return {
         id,

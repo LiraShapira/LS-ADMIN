@@ -7,6 +7,8 @@ export const fetchCompostStandData = async (params?: { period?: number }): Promi
   if (params?.period) {
     urlString = urlString + `period=${params.period}`;
   }
+  // Ensure org reports are included for admin analytics
+  urlString = urlString + (urlString.endsWith('?') ? '' : '&') + 'includeOrg=1';
   try {
     const response: Response = await fetch(urlString, {
       headers: {
