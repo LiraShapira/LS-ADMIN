@@ -34,27 +34,55 @@ const UserItem = ({ user, onUserUpdate }: UserItemProps) => {
         .then((res) => {
           if ('data' in res) {
             setAdminStand('no');
+            // Refresh user data to update the UI
+            if (onUserUpdate) {
+              onUserUpdate();
+            }
+          } else {
+            alert(res.message || 'Failed to remove compost stand admin');
+            // Revert the select to previous value on error
+            e.target.value = currentCompostStand;
           }
         })
         .catch((e) => {
-          console.log(e);
+          console.error('Error removing compost stand admin:', e);
+          alert(e.message || 'Failed to remove compost stand admin');
+          // Revert the select to previous value on error
+          e.target.value = currentCompostStand;
         });
     } else if (newCompostStand !== 'no') {
       const params: CompostStandAdminParams = {
         userId: user.id,
         compostStandId: standsNameToIdMap[newCompostStand],
       };
-      addCompostStandAdmin(params).then((res) => {
-        if ('data' in res) {
-          setAdminStand(res.data.name);
-        }
-      });
+      addCompostStandAdmin(params)
+        .then((res) => {
+          if ('data' in res) {
+            setAdminStand(newCompostStand);
+            // Refresh user data to update the UI
+            if (onUserUpdate) {
+              onUserUpdate();
+            }
+          } else {
+            alert(res.message || 'Failed to add compost stand admin');
+            // Revert the select to previous value on error
+            e.target.value = currentCompostStand;
+          }
+        })
+        .catch((e) => {
+          console.error('Error adding compost stand admin:', e);
+          alert(e.message || 'Failed to add compost stand admin');
+          // Revert the select to previous value on error
+          e.target.value = currentCompostStand;
+        });
     }
   };
 
   useEffect(() => {
     if (user.adminCompostStandId) {
       setAdminStand(standsIdToNameMap[user.adminCompostStandId]);
+    } else {
+      setAdminStand('no');
     }
   }, [user.adminCompostStandId]);
 
