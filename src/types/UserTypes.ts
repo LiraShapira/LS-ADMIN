@@ -38,4 +38,6 @@ export interface User {
   phoneNumber: string,
   transactions: Transaction[];
   adminCompostStandId: number | null;
+  isVerified?: boolean | null;
+  isBanned?: boolean;
 }

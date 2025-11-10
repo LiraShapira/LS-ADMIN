@@ -46,3 +46,43 @@ export const fetchUsers = async (): Promise<ApiServiceReturnType<User[]>> => {
     return e;
   }
 }
+
+export const verifyUser = async (userId: string): Promise<ApiServiceReturnType<User>> => {
+  try {
+    const response: Response = await fetch(`${SERVER_URL}/verifyUser`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+    const JSONResponse = await response.json();
+    if (response.status === 400) {
+      throw new Error(JSONResponse.error);
+    }
+
+    return { data: JSONResponse, status: response.status };
+  } catch (e: any) {
+    return e;
+  }
+}
+
+export const toggleBanUser = async (userId: string): Promise<ApiServiceReturnType<User>> => {
+  try {
+    const response: Response = await fetch(`${SERVER_URL}/toggleBanUser`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+    const JSONResponse = await response.json();
+    if (response.status === 400) {
+      throw new Error(JSONResponse.error);
+    }
+
+    return { data: JSONResponse, status: response.status };
+  } catch (e: any) {
+    return e;
+  }
+}

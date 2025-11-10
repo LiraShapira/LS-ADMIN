@@ -1,13 +1,18 @@
 import { User } from '../../../types/UserTypes';
 import UserItem from './UserItem';
 
-const UserItemList = ({ users }: { users: User[] }) => {
+interface UserItemListProps {
+  users: User[];
+  onUserUpdate?: () => void;
+}
+
+const UserItemList = ({ users, onUserUpdate }: UserItemListProps) => {
   return (
     <div>
       {users.map((user) => {
         return (
           <div key={user.id}>
-            <UserItem user={user}></UserItem>
+            <UserItem user={user} onUserUpdate={onUserUpdate}></UserItem>
             <br></br>
           </div>
         );

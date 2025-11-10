@@ -10,9 +10,17 @@ import {
   removeCompostAdmin,
   addCompostStandAdmin,
 } from '../../../apiServices/CompostStandAdminApi';
+import { verifyUser, toggleBanUser } from '../../../apiServices/userAPI';
 
-const UserItem = ({ user }: { user: User }) => {
+interface UserItemProps {
+  user: User;
+  onUserUpdate?: () => void;
+}
+
+const UserItem = ({ user, onUserUpdate }: UserItemProps) => {
   const [adminStand, setAdminStand] = useState<CompostStandName | 'no'>('no');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isTogglingBan, setIsTogglingBan] = useState(false);
 
   const onSelectNewStart = (e: ChangeEvent<HTMLSelectElement>) => {
     const currentCompostStand = adminStand;
@@ -49,6 +57,45 @@ const UserItem = ({ user }: { user: User }) => {
       setAdminStand(standsIdToNameMap[user.adminCompostStandId]);
     }
   }, [user.adminCompostStandId]);
+
+  const handleVerifyUser = async () => {
+    setIsVerifying(true);
+    try {
+      const response = await verifyUser(user.id);
+      if ('data' in response) {
+        if (onUserUpdate) {
+          onUserUpdate();
+        }
+      } else {
+        alert(response.message || 'Failed to verify user');
+      }
+    } catch (error: any) {
+      alert(error.message || 'Failed to verify user');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleToggleBan = async () => {
+    setIsTogglingBan(true);
+    try {
+      const response = await toggleBanUser(user.id);
+      if ('data' in response) {
+        if (onUserUpdate) {
+          onUserUpdate();
+        }
+      } else {
+        alert(response.message || 'Failed to toggle ban status');
+      }
+    } catch (error: any) {
+      alert(error.message || 'Failed to toggle ban status');
+    } finally {
+      setIsTogglingBan(false);
+    }
+  };
+
+  const isVerified = user.isVerified === true;
+  const isBanned = user.isBanned === true;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -89,6 +136,38 @@ const UserItem = ({ user }: { user: User }) => {
             })}
           </select>
         </span>
+      </div>
+      <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+        {!isVerified && (
+          <button
+            onClick={handleVerifyUser}
+            disabled={isVerifying}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              cursor: isVerifying ? 'not-allowed' : 'pointer',
+              opacity: isVerifying ? 0.6 : 1,
+            }}
+          >
+            {isVerifying ? 'Verifying...' : 'Verify user'}
+          </button>
+        )}
+        <button
+          onClick={handleToggleBan}
+          disabled={isTogglingBan}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: isBanned ? '#FF9800' : '#f44336',
+            color: 'white',
+            border: 'none',
+            cursor: isTogglingBan ? 'not-allowed' : 'pointer',
+            opacity: isTogglingBan ? 0.6 : 1,
+          }}
+        >
+          {isTogglingBan ? 'Processing...' : isBanned ? 'Undo ban' : 'Ban user'}
+        </button>
       </div>
     </div>
   );

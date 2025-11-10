@@ -63,6 +63,14 @@ const NavBar = ({ currentPage, setCurrentPage }: NavBarProps) => {
         Transactions
       </button>
       <button
+        onClick={() => onClick('deposits')}
+        className={classNames('NavBar__tab', {
+          NavBar__selected: currentPage === 'deposits',
+        })}
+      >
+        Deposits
+      </button>
+      <button
         onClick={() => onClick('events')}
         className={classNames('NavBar__tab', {
           NavBar__selected: currentPage === 'events',

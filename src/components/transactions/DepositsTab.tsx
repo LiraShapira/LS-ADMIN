@@ -14,14 +14,14 @@ import {
 import TransactionList from './TransactionsList';
 import { Category } from '../../types/TransactionTypes';
 
-const TransactionsTab = () => {
+const DepositsTab = () => {
   const dispatch = useAppDispatch();
   const allTransactions = useAppSelector(selectTransactions);
   const [period, setPeriod] = useState(30);
   
-  // Filter out DEPOSIT transactions (show only MISC and other types)
-  const transactions = allTransactions.filter(
-    (t) => t.category !== Category.DEPOSIT
+  // Filter only DEPOSIT transactions
+  const deposits = allTransactions.filter(
+    (t) => t.category === Category.DEPOSIT
   );
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const TransactionsTab = () => {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', margin: 5 }}>
       <div className={'DataDisplay'}>
-        <h1>Transactions List</h1>
+        <h1>Deposits List</h1>
         <div>PERIOD: {period} days</div>
         <input
           style={{ width: '50px' }}
@@ -54,19 +54,21 @@ const TransactionsTab = () => {
           onChange={(e) => setPeriod(parseInt(e.target.value))}
           min={0}
         />
-        <div>Transaction count: {transactions.length}</div>
+        <div>Deposit count: {deposits.length}</div>
         <TransactionList 
-          transactions={transactions} 
+          transactions={deposits} 
+          showOnlyReceiver={true} 
+          reverseSort={true}
           onEdit={async (id, amount, reason) => {
             try {
               dispatch(setLoading(true));
               await dispatch(updateTransaction({ id, amount, reason, period })).unwrap();
               await dispatch(loadTransactionStats({ period })).unwrap();
               dispatch(setLoading(false));
-              dispatch(setModalText('Transaction updated successfully'));
+              dispatch(setModalText('Deposit updated successfully'));
               dispatch(setIsModalVisible(true));
             } catch (e: any) {
-              dispatch(setModalText(e.message || 'Failed to update transaction'));
+              dispatch(setModalText(e.message || 'Failed to update deposit'));
               dispatch(setIsModalVisible(true));
               dispatch(setLoading(false));
             }
@@ -77,10 +79,10 @@ const TransactionsTab = () => {
               await dispatch(deleteTransaction({ id, period })).unwrap();
               await dispatch(loadTransactionStats({ period })).unwrap();
               dispatch(setLoading(false));
-              dispatch(setModalText('Transaction deleted successfully'));
+              dispatch(setModalText('Deposit deleted successfully'));
               dispatch(setIsModalVisible(true));
             } catch (e: any) {
-              dispatch(setModalText(e.message || 'Failed to delete transaction'));
+              dispatch(setModalText(e.message || 'Failed to delete deposit'));
               dispatch(setIsModalVisible(true));
               dispatch(setLoading(false));
             }
@@ -91,4 +93,5 @@ const TransactionsTab = () => {
   );
 };
 
-export default TransactionsTab;
+export default DepositsTab;
+

@@ -5,6 +5,8 @@ import { SuccessApiResponse } from '../types/ApiTypes';
 import {
   fetchTransactionStats,
   LoadTransactionsReturn as LoadTransactionStatsReturn,
+  deleteTransaction as deleteTransactionAPI,
+  updateTransaction as updateTransactionAPI,
 } from '../apiServices/TransactionAPI';
 
 interface AppState {
@@ -29,6 +31,29 @@ export const loadTransactionStats = createAsyncThunk<
   return response;
 });
 
+export const deleteTransaction = createAsyncThunk<
+  void,
+  { id: string; period: number },
+  { state: RootState }
+>('transactions/deleteTransaction', async ({ id }) => {
+  const response = await deleteTransactionAPI(id);
+  if (!('data' in response)) {
+    throw new Error(response.message);
+  }
+});
+
+export const updateTransaction = createAsyncThunk<
+  Transaction,
+  { id: string; amount: number; reason?: string; period: number },
+  { state: RootState }
+>('transactions/updateTransaction', async ({ id, amount, reason }) => {
+  const response = await updateTransactionAPI(id, amount, reason);
+  if (!('data' in response)) {
+    throw new Error(response.message);
+  }
+  return response.data;
+});
+
 const appSlice = createSlice({
   name: 'transactions',
   initialState,
@@ -41,6 +66,12 @@ const appSlice = createSlice({
     builder.addCase(loadTransactionStats.fulfilled, (state, action) => {
       const transactions = action?.payload?.data?.transactions || [];
       state.transactions = transactions;
+    });
+    builder.addCase(deleteTransaction.fulfilled, (state, action) => {
+      // Transaction deleted, will be refreshed by parent component
+    });
+    builder.addCase(updateTransaction.fulfilled, (state, action) => {
+      // Transaction updated, will be refreshed by parent component
     });
   },
 });

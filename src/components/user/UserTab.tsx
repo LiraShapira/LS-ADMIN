@@ -67,7 +67,26 @@ const UserTab = () => {
         />
 
 
-        <UserItemList users={users.filter((user: any) => !user._hidden)} />
+        <UserItemList 
+          users={users.filter((user: any) => !user._hidden)} 
+          onUserUpdate={() => {
+            // Refresh users list after update
+            dispatch(setLoading(true));
+            fetchUsers()
+              .then((response) => {
+                if (response instanceof Error) {
+                  throw new Error(response.message);
+                }
+                setUsers(response.data);
+                dispatch(setLoading(false));
+              })
+              .catch((e) => {
+                dispatch(setLoading(false));
+                dispatch(setModalText(e.message));
+                dispatch(setIsModalVisible(true));
+              });
+          }}
+        />
 
       </div>
     </div>
