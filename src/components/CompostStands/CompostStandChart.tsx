@@ -1,11 +1,4 @@
 import { useState, useEffect } from 'react';
-import {
-  ResponsiveContainer,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts';
 import { fetchCompostReportData } from '../../apiServices/CompostStandAPI';
 
 export interface ReportBooleanProperty {
@@ -29,11 +22,6 @@ export interface StandStats {
 
 export default function CompostReportStats({ period = 30 }: { period?: number }) {
   const [stats, setStats] = useState<StandStats[]>([]);
-  const [openMap, setOpenMap] = useState<Record<number, boolean>>({});
-
-  const toggleStand = (id: number) => {
-    setOpenMap((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   useEffect(() => {
     fetchCompostReportData({ period })
@@ -46,70 +34,71 @@ export default function CompostReportStats({ period = 30 }: { period?: number })
       .catch(console.error);
   }, [period]);
 
+  const formatPropertyName = (name: string): string => {
+    return name
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
+  };
+
   return (
     <div>
       <h2>Compost Report Stats (last {period} days)</h2>
       {stats.map((standStatsObject) => (
-        <div key={standStatsObject.compostStandId} style={{ marginBottom: '1.5rem' }}>
-          <h3
-            onClick={() => toggleStand(standStatsObject.compostStandId)}
-            style={{ cursor: 'pointer', userSelect: 'none' }}
-          >
-            {openMap[standStatsObject.compostStandId] ? '▼' : '▶'} {standStatsObject.standName}
-          </h3>
-          {openMap[standStatsObject.compostStandId] && (
-            <>
-              <div>
-                {(['cleanAndTidy', 'full', 'scalesProblem', 'bugs', 'compostSmell'] as const).map(prop => {
-                  if (standStatsObject[prop].missing === standStatsObject.total) {
-                    return (
-                      <div key={prop} style={{ width: '30%' }}>
-                        <h4>{prop}</h4>
-                        <p>No data available</p>
-                      </div>
-                    );
-                  }
-                  const data = [
-                    { name: 'true', value: (standStatsObject)[prop].true },
-                    { name: 'false', value: (standStatsObject)[prop].false }
-                  ];
-                  const colors = data.map(entry => {
-                    // cleanAndTidy is "good": true=green, false=red
-                    if (prop === 'cleanAndTidy') return entry.name === 'true' ? 'green' : 'red';
-                    // others are "bad" props: true=red, false=green
-                    return entry.name === 'true' ? 'red' : 'green';
-                  });
-
-                  return (
-                    <div key={prop} style={{ width: '30%' }}>
-                      <h4>{prop}</h4>
-                      <ResponsiveContainer width="100%" height={200}>
-                        <PieChart>
-                          <Pie
-                            dataKey="value"
-                            data={data}
-                            nameKey="name"
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={60}
-                            label={(entry) => `${entry.name}: ${entry.value}`}
-                          >
-                            {data.map((_, idx) => (
-                              <Cell key={idx} fill={colors[idx]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
+        <div key={standStatsObject.compostStandId} style={{ marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>{standStatsObject.standName}</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
+            <thead>
+              <tr>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'left' }}>Property</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>True</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>False</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>Missing</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd', fontWeight: 'bold' }}>Total Reports</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }} colSpan={4}>
+                  {standStatsObject.total}
+                </td>
+              </tr>
+              {(['cleanAndTidy', 'full', 'scalesProblem', 'bugs', 'compostSmell', 'dryMatterPresent'] as const).map(prop => (
+                <tr key={prop}>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                    {formatPropertyName(prop)}
+                  </td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
+                    {standStatsObject[prop].true}
+                  </td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
+                    {standStatsObject[prop].false}
+                  </td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
+                    {standStatsObject[prop].missing}
+                  </td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
+                    {standStatsObject[prop].true + standStatsObject[prop].false + standStatsObject[prop].missing}
+                  </td>
+                </tr>
+              ))}
+              <tr>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Notes</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
+                  {standStatsObject.notes.with || 0} (with)
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
+                  {standStatsObject.notes.without || 0} (without)
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }} colSpan={2}>
+                  {standStatsObject.total}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      ))
-      }
-    </div >
+      ))}
+    </div>
   );
 }
