@@ -7,12 +7,13 @@ import {
   updateCompostStand,
   CompostStandFromAPI 
 } from '../../apiServices/CompostStandAPI';
-import { useAppDispatch } from '../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import {
   setIsModalVisible,
   setLoading,
   setModalText,
 } from '../../store/appSlice';
+import { selectSelectedCommunityId } from '../../store/appSlice';
 import CompostStandChart from './CompostStandChart';
 import { CompostStandTable } from './CompostStandTable';
 import PeriodSlider from '../PeriodSlider';
@@ -40,10 +41,12 @@ const CompostStandDataDisplay = () => {
   const [newStandNameEn, setNewStandNameEn] = useState('');
   const [newStandNameHe, setNewStandNameHe] = useState('');
   const dispatch = useAppDispatch();
+  const communityId = useAppSelector(selectSelectedCommunityId);
 
   const loadAllStands = async () => {
+    if (!communityId) return;
     try {
-      const response = await fetchAllCompostStands();
+      const response = await fetchAllCompostStands(communityId);
       if (response instanceof Error) {
         throw new Error(response.message);
       }
@@ -56,10 +59,11 @@ const CompostStandDataDisplay = () => {
   };
 
   useEffect(() => {
+    if (!communityId) return;
     dispatch(setLoading(true));
-    // TODO debounce
     fetchCompostStandData({
       period,
+      communityId,
     })
       .then((response) => {
         if (response instanceof Error) {
@@ -74,9 +78,8 @@ const CompostStandDataDisplay = () => {
         dispatch(setLoading(false));
       });
     
-    // Load all stands for management
     loadAllStands();
-  }, [period]);
+  }, [period, communityId]);
 
   const handleAddStand = async () => {
     if (!newStandNameEn.trim() || !newStandNameHe.trim()) {
@@ -87,9 +90,15 @@ const CompostStandDataDisplay = () => {
 
     try {
       dispatch(setLoading(true));
+      if (!communityId) {
+        dispatch(setModalText('Please select a community first'));
+        dispatch(setIsModalVisible(true));
+        return;
+      }
       const response = await createCompostStand({
         name_en: newStandNameEn.trim(),
         name_he: newStandNameHe.trim(),
+        communityId,
       });
 
       if (response instanceof Error) {

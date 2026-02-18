@@ -13,7 +13,9 @@ import {
 const EventsTab = () => {
   const dispatch = useAppDispatch();
   const events = useAppSelector(selectEvents);
+  const communityId = useAppSelector((state) => state.appState.selectedCommunityId);
   useEffect(() => {
+    if (!communityId) return;
     dispatch(setLoading(true));
     dispatch(loadEvents())
       .unwrap()
@@ -35,7 +37,7 @@ const EventsTab = () => {
         dispatch(setLoading(false));
         throw new Error(e);
       });
-  }, []);
+  }, [communityId]);
 
   return (
     <div>

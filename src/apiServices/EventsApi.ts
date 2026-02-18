@@ -3,8 +3,11 @@ import { LSEvent } from "../types/EventTypes";
 import { SERVER_URL } from "./config";
 import { Location } from "../types/EventTypes";
 
-export const fetchLSEventsData = async (): Promise<ApiServiceReturnType<LSEvent[]>> => {
-  let urlString = `${SERVER_URL}/events`
+export const fetchLSEventsData = async (communityId?: string): Promise<ApiServiceReturnType<LSEvent[]>> => {
+  let urlString = `${SERVER_URL}/events`;
+  if (communityId) {
+    urlString += `?communityId=${encodeURIComponent(communityId)}`;
+  }
   try {
     const response: Response = await fetch(urlString, {
       headers: {
@@ -23,8 +26,11 @@ export const fetchLSEventsData = async (): Promise<ApiServiceReturnType<LSEvent[
 }
 
 
-export const fetchLocations = async (): Promise<ApiServiceReturnType<Location[]>> => {
-  let urlString = `${SERVER_URL}/locations`
+export const fetchLocations = async (communityId?: string): Promise<ApiServiceReturnType<Location[]>> => {
+  let urlString = `${SERVER_URL}/locations`;
+  if (communityId) {
+    urlString += `?communityId=${encodeURIComponent(communityId)}`;
+  }
   try {
     const response: Response = await fetch(urlString, {
       headers: {

@@ -8,11 +8,13 @@ export interface LoadTransactionsReturn {
   transactions: Transaction[]
 }
 
-export const fetchTransactionStats = async (params?: { period?: number }): Promise<ApiServiceReturnType<LoadTransactionsReturn>> => {
-
-  let urlString = `${SERVER_URL}/transactionStats?`
+export const fetchTransactionStats = async (params?: { period?: number; communityId?: string }): Promise<ApiServiceReturnType<LoadTransactionsReturn>> => {
+  let urlString = `${SERVER_URL}/transactionStats?`;
   if (params?.period) {
-    urlString = urlString + `period=${params.period}`;
+    urlString += `period=${params.period}`;
+  }
+  if (params?.communityId) {
+    urlString += (urlString.endsWith('?') ? '' : '&') + `communityId=${encodeURIComponent(params.communityId)}`;
   }
   try {
     const response: Response = await fetch(urlString, {

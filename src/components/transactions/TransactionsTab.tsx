@@ -4,6 +4,7 @@ import {
   setModalText,
   setIsModalVisible,
 } from '../../store/appSlice';
+import { selectSelectedCommunityId } from '../../store/appSlice';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import {
   loadTransactionStats,
@@ -16,6 +17,7 @@ import { Category } from '../../types/TransactionTypes';
 
 const TransactionsTab = () => {
   const dispatch = useAppDispatch();
+  const communityId = useAppSelector(selectSelectedCommunityId);
   const allTransactions = useAppSelector(selectTransactions);
   const [period, setPeriod] = useState(30);
   
@@ -25,8 +27,9 @@ const TransactionsTab = () => {
   );
 
   useEffect(() => {
+    if (!communityId) return;
     dispatch(setLoading(true));
-    dispatch(loadTransactionStats({ period }))
+    dispatch(loadTransactionStats({ period, communityId }))
       .unwrap()
       .then((response) => {
         if (response instanceof Error) {
@@ -40,7 +43,7 @@ const TransactionsTab = () => {
         dispatch(setLoading(false));
         throw new Error(e);
       });
-  }, [dispatch, period]);
+  }, [dispatch, period, communityId]);
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', margin: 5 }}>
@@ -61,7 +64,7 @@ const TransactionsTab = () => {
             try {
               dispatch(setLoading(true));
               await dispatch(updateTransaction({ id, amount, reason, period })).unwrap();
-              await dispatch(loadTransactionStats({ period })).unwrap();
+              await dispatch(loadTransactionStats({ period, communityId })).unwrap();
               dispatch(setLoading(false));
               dispatch(setModalText('Transaction updated successfully'));
               dispatch(setIsModalVisible(true));
@@ -75,7 +78,7 @@ const TransactionsTab = () => {
             try {
               dispatch(setLoading(true));
               await dispatch(deleteTransaction({ id, period })).unwrap();
-              await dispatch(loadTransactionStats({ period })).unwrap();
+              await dispatch(loadTransactionStats({ period, communityId })).unwrap();
               dispatch(setLoading(false));
               dispatch(setModalText('Transaction deleted successfully'));
               dispatch(setIsModalVisible(true));

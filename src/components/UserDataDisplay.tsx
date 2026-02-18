@@ -3,17 +3,20 @@ import { fetchUserData } from '../apiServices/userAPI';
 import { UserData } from '../types/UserTypes';
 import { convertUserData } from '../utils/UserDataUtils';
 import PeriodSlider from './PeriodSlider';
-
+import { useAppSelector } from '../utils/hooks';
+import { selectSelectedCommunityId } from '../store/appSlice';
 
 const UserDataDisplay = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [period, setPeriod] = useState<number>(30);
   const [error, setError] = useState<string | null>(null);
+  const communityId = useAppSelector(selectSelectedCommunityId);
 
   useEffect(() => {
-    // TODO debounce
+    if (!communityId) return;
     fetchUserData({
       period,
+      communityId,
     })
       .then((response) => {
         if (response instanceof Error) {
@@ -33,7 +36,7 @@ const UserDataDisplay = () => {
         console.error('Error in UserDataDisplay:', e);
         setError('An error occurred while fetching data');
       });
-  }, [period]);
+  }, [period, communityId]);
 
   if (error) {
     return (

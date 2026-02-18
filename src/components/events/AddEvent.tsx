@@ -7,10 +7,12 @@ import { LSEvent, Location } from '../../types/EventTypes';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { selectEvents, setEvents } from '../../store/eventsSlice';
 import { setLoading } from '../../store/appSlice';
+import { selectSelectedCommunityId } from '../../store/appSlice';
 
 const AddEvent = () => {
   const dispatch = useAppDispatch();
   const events = useAppSelector(selectEvents);
+  const communityId = useAppSelector(selectSelectedCommunityId);
   const [eventTitle, setEventTitle] = useState('');
   const [eventDescription, setEventDescription] = useState('');
   const [selectedLocationId, setSelectedLocationId] = useState('');
@@ -19,7 +21,8 @@ const AddEvent = () => {
   const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
-    fetchLocations()
+    if (!communityId) return;
+    fetchLocations(communityId)
       .then((response) => {
         if (response instanceof Error) {
           throw new Error(response.message);
@@ -30,13 +33,12 @@ const AddEvent = () => {
       .catch((e) => {
         throw new Error(e);
       });
-  }, []);
+  }, [communityId]);
 
   const onFormSubmit = (e: FormEvent) => {
     dispatch(setLoading(true));
     e.preventDefault();
     const newEvent: LSEvent = {
-      // this id will be replaced by a random uuid in backend
       id: '123',
       title: eventTitle,
       description: eventDescription,
@@ -44,6 +46,7 @@ const AddEvent = () => {
       endDate,
       attendees: [],
       location: { id: selectedLocationId },
+      ...(communityId && { communityId }),
     };
     setEventTitle('');
     setEventDescription('');

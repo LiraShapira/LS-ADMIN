@@ -21,10 +21,11 @@ const initialState: AppState = {
 
 export const loadTransactionStats = createAsyncThunk<
   SuccessApiResponse<LoadTransactionStatsReturn>,
-  { period: number },
+  { period: number; communityId?: string },
   { state: RootState }
->('transactions/loadTransactionStats', async ({ period }) => {
-  const response = await fetchTransactionStats({ period });
+>('transactions/loadTransactionStats', async ({ period, communityId }, { getState }) => {
+  const id = communityId ?? getState().appState.selectedCommunityId;
+  const response = await fetchTransactionStats({ period, communityId: id });
   if (!('data' in response)) {
     throw new Error(response.message);
   }

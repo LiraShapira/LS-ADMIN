@@ -2,10 +2,13 @@ import { SERVER_URL } from "./config";
 import { ApiServiceReturnType } from "../types/ApiTypes";
 import { User, UserDataDTO } from "../types/UserTypes";
 
-export const fetchUserData = async (params?: { period?: number }): Promise<ApiServiceReturnType<UserDataDTO>> => {
-  let urlString = `${SERVER_URL}/userStats?`
+export const fetchUserData = async (params?: { period?: number; communityId?: string }): Promise<ApiServiceReturnType<UserDataDTO>> => {
+  let urlString = `${SERVER_URL}/userStats?`;
   if (params?.period) {
-    urlString = urlString + `period=${params.period}`;
+    urlString += `period=${params.period}`;
+  }
+  if (params?.communityId) {
+    urlString += (urlString.endsWith('?') ? '' : '&') + `communityId=${encodeURIComponent(params.communityId)}`;
   }
   try {
     const response: Response = await fetch(urlString, {
@@ -27,9 +30,11 @@ export const fetchUserData = async (params?: { period?: number }): Promise<ApiSe
   }
 }
 
-export const fetchUsers = async (): Promise<ApiServiceReturnType<User[]>> => {
-  let urlString = `${SERVER_URL}/users`
-
+export const fetchUsers = async (communityId?: string): Promise<ApiServiceReturnType<User[]>> => {
+  let urlString = `${SERVER_URL}/users`;
+  if (communityId) {
+    urlString += `?communityId=${encodeURIComponent(communityId)}`;
+  }
   try {
     const response: Response = await fetch(urlString, {
       headers: {

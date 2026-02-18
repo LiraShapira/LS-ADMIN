@@ -24,8 +24,9 @@ export const loadEvents = createAsyncThunk<
   SuccessApiResponse<LSEvent[]>,
   undefined,
   { state: RootState }>
-  ('eventsSlice/loadEvents', async (): Promise<SuccessApiResponse<LSEvent[]>> => {
-    const response = await fetchLSEventsData();
+  ('eventsSlice/loadEvents', async (_arg, { getState }): Promise<SuccessApiResponse<LSEvent[]>> => {
+    const communityId = getState().appState.selectedCommunityId;
+    const response = await fetchLSEventsData(communityId);
     if (!('data' in response)) {
       throw new Error(response.message);
     } else {

@@ -14,6 +14,7 @@ export interface CompostStandFromAPI {
 export interface CreateCompostStandParams {
   name_en: string;
   name_he: string;
+  communityId: string;
 }
 
 export interface UpdateCompostStandParams {
@@ -23,13 +24,15 @@ export interface UpdateCompostStandParams {
   isActive?: boolean;
 }
 
-export const fetchCompostStandData = async (params?: { period?: number }): Promise<ApiServiceReturnType<CompostStandDataDTO>> => {
-  let urlString = `${SERVER_URL}/compostStandStats?`
+export const fetchCompostStandData = async (params?: { period?: number; communityId?: string }): Promise<ApiServiceReturnType<CompostStandDataDTO>> => {
+  let urlString = `${SERVER_URL}/compostStandStats?`;
   if (params?.period) {
-    urlString = urlString + `period=${params.period}`;
+    urlString += `period=${params.period}`;
   }
-  // Ensure org reports are included for admin analytics
-  urlString = urlString + (urlString.endsWith('?') ? '' : '&') + 'includeOrg=1';
+  if (params?.communityId) {
+    urlString += (urlString.endsWith('?') ? '' : '&') + `communityId=${encodeURIComponent(params.communityId)}`;
+  }
+  urlString += (urlString.endsWith('?') ? '' : '&') + 'includeOrg=1';
   try {
     const response: Response = await fetch(urlString, {
       headers: {
@@ -47,9 +50,13 @@ export const fetchCompostStandData = async (params?: { period?: number }): Promi
   }
 }
 
-export const fetchAllCompostStands = async (): Promise<ApiServiceReturnType<CompostStandFromAPI[]>> => {
+export const fetchAllCompostStands = async (communityId?: string): Promise<ApiServiceReturnType<CompostStandFromAPI[]>> => {
   try {
-    const response: Response = await fetch(`${SERVER_URL}/compostStands?includeInactive=true`, {
+    let url = `${SERVER_URL}/compostStands?includeInactive=true`;
+    if (communityId) {
+      url += `&communityId=${encodeURIComponent(communityId)}`;
+    }
+    const response: Response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -102,10 +109,13 @@ export const updateCompostStand = async (params: UpdateCompostStandParams): Prom
   }
 };
 
-export const fetchCompostReportData = async (params?: { period?: number }): Promise<ApiServiceReturnType<StandStats[]>> => {
-  let urlString = `${SERVER_URL}/compostReportStats?`
+export const fetchCompostReportData = async (params?: { period?: number; communityId?: string }): Promise<ApiServiceReturnType<StandStats[]>> => {
+  let urlString = `${SERVER_URL}/compostReportStats?`;
   if (params?.period) {
-    urlString = urlString + `period=${params.period}`;
+    urlString += `period=${params.period}`;
+  }
+  if (params?.communityId) {
+    urlString += (urlString.endsWith('?') ? '' : '&') + `communityId=${encodeURIComponent(params.communityId)}`;
   }
   try {
     const response: Response = await fetch(urlString, {

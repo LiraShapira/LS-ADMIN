@@ -3,21 +3,23 @@ import { fetchUsers } from '../../apiServices/userAPI';
 import { User } from '../../types/UserTypes';
 import UserItemList from './userList/UserItemList';
 import UserDataDisplay from '../UserDataDisplay';
-import { useAppDispatch } from '../../utils/hooks';
+import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import {
   setIsModalVisible,
   setLoading,
   setModalText,
 } from '../../store/appSlice';
+import { selectSelectedCommunityId } from '../../store/appSlice';
 
 const UserTab = () => {
   const [users, setUsers] = useState<User[]>([]);
-  // const [userListOpen, setUserListOpen] = useState<boolean>(true);
   const dispatch = useAppDispatch();
+  const communityId = useAppSelector(selectSelectedCommunityId);
 
   useEffect(() => {
+    if (!communityId) return;
     dispatch(setLoading(true));
-    fetchUsers()
+    fetchUsers(communityId)
       .then((response) => {
         if (response instanceof Error) {
           throw new Error(response.message);
@@ -31,7 +33,7 @@ const UserTab = () => {
         dispatch(setIsModalVisible(true));
         throw new Error(e);
       });
-  }, [dispatch]);
+  }, [dispatch, communityId]);
 
   const onFilterUsers = (search: string) => {
     const lowerSearch = search.toLowerCase();
@@ -70,9 +72,9 @@ const UserTab = () => {
         <UserItemList 
           users={users.filter((user: any) => !user._hidden)} 
           onUserUpdate={() => {
-            // Refresh users list after update
+            if (!communityId) return;
             dispatch(setLoading(true));
-            fetchUsers()
+            fetchUsers(communityId)
               .then((response) => {
                 if (response instanceof Error) {
                   throw new Error(response.message);
