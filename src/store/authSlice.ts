@@ -4,7 +4,7 @@ import { RootState } from '.';
 export interface Admin {
   id: string;
   email: string;
-  communityId: string | null;
+  communityId: number | null;
   isSuperAdmin: boolean;
 }
 

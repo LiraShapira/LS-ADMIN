@@ -59,7 +59,7 @@ function AppContent() {
             
             // Set communityId from admin if not super admin
             if (!currentAdmin.isSuperAdmin && currentAdmin.communityId) {
-              dispatch(setSelectedCommunityId(currentAdmin.communityId));
+              dispatch(setSelectedCommunityId(String(currentAdmin.communityId)));
             }
           } catch (error) {
             // Admin session invalid, clear storage
@@ -84,7 +84,7 @@ function AppContent() {
   // Set communityId when admin changes (for non-super admins)
   useEffect(() => {
     if (admin && !admin.isSuperAdmin && admin.communityId) {
-      dispatch(setSelectedCommunityId(admin.communityId));
+      dispatch(setSelectedCommunityId(String(admin.communityId)));
     }
   }, [admin, dispatch]);
 
