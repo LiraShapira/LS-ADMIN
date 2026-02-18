@@ -3,13 +3,15 @@ import eventsSlice from './eventsSlice';
 import appSlice from './appSlice';
 import transactionsSlice from './transactionsSlice';
 import compostStandSlice from './compostStandSlice';
+import authSlice from './authSlice';
 
 export const store = configureStore({
   reducer: {
     eventState: eventsSlice,
     appState: appSlice,
     transactionState: transactionsSlice,
-    compostStandsState: compostStandSlice
+    compostStandsState: compostStandSlice,
+    authState: authSlice,
   },
 });
 

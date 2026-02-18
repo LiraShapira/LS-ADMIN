@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppPage } from '../types/AppTypes';
 import classNames from 'classnames';
-import { useIsMobile } from '../utils/hooks';
+import { useIsMobile, useAppDispatch } from '../utils/hooks';
+import { logout } from '../store/authSlice';
+import { logout as logoutAPI } from '../apiServices/adminAPI';
 
 interface NavBarProps {
   currentPage: AppPage;
@@ -9,10 +11,21 @@ interface NavBarProps {
 }
 
 const NavBar = ({ currentPage, setCurrentPage }: NavBarProps) => {
+  const dispatch = useAppDispatch();
   const [visible, setVisible] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const lastScrollY = useRef(0);
   const isMobile = useIsMobile();
+
+  const handleLogout = async () => {
+    try {
+      await logoutAPI();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      dispatch(logout());
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,6 +90,13 @@ const NavBar = ({ currentPage, setCurrentPage }: NavBarProps) => {
         })}
       >
         Events
+      </button>
+      <button
+        onClick={handleLogout}
+        className="NavBar__tab NavBar__logout"
+        style={{ marginLeft: 'auto' }}
+      >
+        Logout
       </button>
     </>
   );
