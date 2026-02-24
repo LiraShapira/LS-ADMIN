@@ -1,16 +1,12 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { User } from '../../../types/UserTypes';
 import {
-  standsIdToNameMap,
-  standsNameToIdMap,
-} from '../../../utils/CompostStandUtils';
-import { CompostStandName } from '../../../types/CompostStandTypes';
-import {
   CompostStandAdminParams,
   removeCompostAdmin,
   addCompostStandAdmin,
 } from '../../../apiServices/CompostStandAdminApi';
 import { verifyUser, toggleBanUser } from '../../../apiServices/userAPI';
+import { fetchAllCompostStands, CompostStandFromAPI } from '../../../apiServices/CompostStandAPI';
 
 interface UserItemProps {
   user: User;
@@ -18,71 +14,74 @@ interface UserItemProps {
 }
 
 const UserItem = ({ user, onUserUpdate }: UserItemProps) => {
-  const [adminStand, setAdminStand] = useState<CompostStandName | 'no'>('no');
+  const [adminStandId, setAdminStandId] = useState<string>('no');
+  const [compostStands, setCompostStands] = useState<CompostStandFromAPI[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isTogglingBan, setIsTogglingBan] = useState(false);
 
-  const onSelectNewStart = (e: ChangeEvent<HTMLSelectElement>) => {
-    const currentCompostStand = adminStand;
-    const newCompostStand = e.target.value as CompostStandName | 'no';
+  useEffect(() => {
+    fetchAllCompostStands().then((res) => {
+      if ('data' in res && res.data) {
+        setCompostStands(res.data);
+      }
+    });
+  }, []);
 
-    if (newCompostStand === 'no' && currentCompostStand !== 'no') {
+  const onSelectNewStart = (e: ChangeEvent<HTMLSelectElement>) => {
+    const currentStandId = adminStandId;
+    const newStandId = e.target.value;
+
+    if (newStandId === 'no' && currentStandId !== 'no') {
       removeCompostAdmin({
         userId: user.id,
-        compostStandId: standsNameToIdMap[currentCompostStand],
+        compostStandId: Number(currentStandId),
       })
         .then((res) => {
           if ('data' in res) {
-            setAdminStand('no');
-            // Refresh user data to update the UI
+            setAdminStandId('no');
             if (onUserUpdate) {
               onUserUpdate();
             }
           } else {
             alert(res.message || 'Failed to remove compost stand admin');
-            // Revert the select to previous value on error
-            e.target.value = currentCompostStand;
+            e.target.value = currentStandId;
           }
         })
-        .catch((e) => {
-          console.error('Error removing compost stand admin:', e);
-          alert(e.message || 'Failed to remove compost stand admin');
-          // Revert the select to previous value on error
-          e.target.value = currentCompostStand;
+        .catch((err) => {
+          console.error('Error removing compost stand admin:', err);
+          alert(err.message || 'Failed to remove compost stand admin');
+          e.target.value = currentStandId;
         });
-    } else if (newCompostStand !== 'no') {
+    } else if (newStandId !== 'no') {
       const params: CompostStandAdminParams = {
         userId: user.id,
-        compostStandId: standsNameToIdMap[newCompostStand],
+        compostStandId: Number(newStandId),
       };
       addCompostStandAdmin(params)
         .then((res) => {
           if ('data' in res) {
-            setAdminStand(newCompostStand);
-            // Refresh user data to update the UI
+            setAdminStandId(newStandId);
             if (onUserUpdate) {
               onUserUpdate();
             }
           } else {
             alert(res.message || 'Failed to add compost stand admin');
-            // Revert the select to previous value on error
-            e.target.value = currentCompostStand;
+            e.target.value = currentStandId;
           }
         })
-        .catch((e) => {
-          console.error('Error adding compost stand admin:', e);
-          alert(e.message || 'Failed to add compost stand admin');
-          // Revert the select to previous value on error
-          e.target.value = currentCompostStand;
+        .catch((err) => {
+          console.error('Error adding compost stand admin:', err);
+          alert(err.message || 'Failed to add compost stand admin');
+          e.target.value = currentStandId;
         });
     }
   };
 
   useEffect(() => {
     if (user.adminCompostStandId) {
-      setAdminStand(standsIdToNameMap[user.adminCompostStandId]);
+      setAdminStandId(String(user.adminCompostStandId));
     } else {
-      setAdminStand('no');
+      setAdminStandId('no');
     }
   }, [user.adminCompostStandId]);
 
@@ -152,16 +151,14 @@ const UserItem = ({ user, onUserUpdate }: UserItemProps) => {
             onChange={onSelectNewStart}
             name='compost_stands'
             id='compost-stands'
-            value={adminStand || 'no'}
+            value={adminStandId}
           >
             <option value='no'>no</option>
-            {Object.values(standsIdToNameMap).map((stand) => {
-              return (
-                <option key={stand} value={stand}>
-                  {stand}
-                </option>
-              );
-            })}
+            {compostStands.map((stand) => (
+              <option key={stand.compostStandId} value={stand.compostStandId}>
+                {stand.displayName || stand.name_en || stand.name}
+              </option>
+            ))}
           </select>
         </span>
       </div>
