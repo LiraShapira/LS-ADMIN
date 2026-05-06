@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
 import { CompostStandDataDTO } from '../../types/ApiTypes';
 import { 
   fetchCompostStandData, 
+  fetchCompostReports,
   fetchAllCompostStands, 
   createCompostStand, 
   updateCompostStand,
-  CompostStandFromAPI 
+  CompostStandFromAPI,
+  CompostReportFromAPI
 } from '../../apiServices/CompostStandAPI';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import {
@@ -26,6 +29,7 @@ const initialUserData: CompostStandDataDTO = {
       depositWeightSum: 148.92,
       averageDepositWeight: 18.62,
       depositCount: 8,
+      depositUsersCount: 6,
     },
   ],
   period: 30,
@@ -37,11 +41,40 @@ const CompostStandDataDisplay = () => {
   const [isStandsListVisible, setIsStandsListVisible] = useState(true);
   const [period, setPeriod] = useState<number>(30);
   const [allStands, setAllStands] = useState<CompostStandFromAPI[]>([]);
+  const [allReports, setAllReports] = useState<CompostReportFromAPI[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newStandNameEn, setNewStandNameEn] = useState('');
   const [newStandNameHe, setNewStandNameHe] = useState('');
+  const [exportFromDate, setExportFromDate] = useState('');
+  const [exportToDate, setExportToDate] = useState('');
   const dispatch = useAppDispatch();
   const communityId = useAppSelector(selectSelectedCommunityId);
+
+  const getDepositorsByStand = (reports: CompostReportFromAPI[], selectedPeriod: number): Record<number, number> => {
+    const now = new Date();
+    const from = new Date(now);
+    from.setDate(now.getDate() - selectedPeriod);
+
+    const byStand: Record<number, Set<string>> = {};
+    reports.forEach((report) => {
+      if (!report.date || !report.userId) {
+        return;
+      }
+      const reportDate = new Date(report.date);
+      if (Number.isNaN(reportDate.getTime()) || reportDate < from || reportDate > now) {
+        return;
+      }
+
+      if (!byStand[report.compostStandId]) {
+        byStand[report.compostStandId] = new Set<string>();
+      }
+      byStand[report.compostStandId].add(report.userId);
+    });
+
+    return Object.fromEntries(
+      Object.entries(byStand).map(([standId, users]) => [Number(standId), users.size])
+    );
+  };
 
   const loadAllStands = async () => {
     if (!communityId) return;
@@ -61,15 +94,30 @@ const CompostStandDataDisplay = () => {
   useEffect(() => {
     if (!communityId) return;
     dispatch(setLoading(true));
-    fetchCompostStandData({
-      period,
-      communityId,
-    })
-      .then((response) => {
-        if (response instanceof Error) {
-          throw new Error(response.message);
+    Promise.all([
+      fetchCompostStandData({
+        period,
+        communityId,
+      }),
+      fetchCompostReports(communityId),
+    ])
+      .then(([standDataResponse, reportsResponse]) => {
+        if (standDataResponse instanceof Error) {
+          throw new Error(standDataResponse.message);
         }
-        setCompostStandData(response.data);
+        if (reportsResponse instanceof Error) {
+          throw new Error(reportsResponse.message);
+        }
+        setAllReports(reportsResponse.data);
+        const depositorsByStand = getDepositorsByStand(reportsResponse.data, period);
+        const mergedData: CompostStandDataDTO = {
+          ...standDataResponse.data,
+          depositsWeightsByStands: standDataResponse.data.depositsWeightsByStands.map((stand) => ({
+            ...stand,
+            depositUsersCount: depositorsByStand[Number(stand.id)] || 0,
+          })),
+        };
+        setCompostStandData(mergedData);
         dispatch(setLoading(false));
       })
       .catch((e) => {
@@ -80,6 +128,16 @@ const CompostStandDataDisplay = () => {
     
     loadAllStands();
   }, [period, communityId]);
+
+  useEffect(() => {
+    const now = new Date();
+    const from = new Date(now);
+    from.setDate(now.getDate() - 30);
+
+    const formatDateInput = (date: Date) => date.toISOString().split('T')[0];
+    setExportFromDate(formatDateInput(from));
+    setExportToDate(formatDateInput(now));
+  }, []);
 
   const handleAddStand = async () => {
     if (!newStandNameEn.trim() || !newStandNameHe.trim()) {
@@ -144,33 +202,126 @@ const CompostStandDataDisplay = () => {
     }
   };
 
+  const handleDownloadXlsx = () => {
+    if (!exportFromDate || !exportToDate) {
+      dispatch(setModalText('Please select both start and end dates'));
+      dispatch(setIsModalVisible(true));
+      return;
+    }
+
+    const from = new Date(`${exportFromDate}T00:00:00`);
+    const to = new Date(`${exportToDate}T23:59:59.999`);
+
+    if (from > to) {
+      dispatch(setModalText('Start date must be earlier than end date'));
+      dispatch(setIsModalVisible(true));
+      return;
+    }
+
+    const standNameById: Record<number, string> = {};
+    allStands.forEach((stand) => {
+      standNameById[stand.compostStandId] = stand.displayName || stand.name_en || stand.name;
+    });
+
+    const filtered = allReports.filter((report) => {
+      if (!report.date) return false;
+      const d = new Date(report.date);
+      return !Number.isNaN(d.getTime()) && d >= from && d <= to;
+    });
+
+    const uniqueUsersByStand: Record<number, Set<string>> = {};
+    const depositCountByStand: Record<number, number> = {};
+    const weightSumByStand: Record<number, number> = {};
+    filtered.forEach((report) => {
+      const standId = report.compostStandId;
+      if (!depositCountByStand[standId]) {
+        depositCountByStand[standId] = 0;
+      }
+      depositCountByStand[standId] += 1;
+      const depositWeight = Number(report.depositWeight || 0);
+      if (!weightSumByStand[standId]) {
+        weightSumByStand[standId] = 0;
+      }
+      weightSumByStand[standId] += Number.isFinite(depositWeight) ? depositWeight : 0;
+
+      if (report.userId) {
+        if (!uniqueUsersByStand[standId]) {
+          uniqueUsersByStand[standId] = new Set<string>();
+        }
+        uniqueUsersByStand[standId].add(report.userId);
+      }
+    });
+
+    const rows = Object.keys(depositCountByStand)
+      .map((standIdStr) => {
+        const standId = Number(standIdStr);
+        return {
+          standId,
+          standName: standNameById[standId] || `stand_${standId}`,
+          totalWeightKg: Number((weightSumByStand[standId] || 0).toFixed(2)),
+          depositCount: depositCountByStand[standId] || 0,
+          averageDepositWeightKg: Number(
+            (((weightSumByStand[standId] || 0) / Math.max(depositCountByStand[standId] || 0, 1))).toFixed(2)
+          ),
+          depositorsUsers: uniqueUsersByStand[standId]?.size || 0,
+        };
+      })
+      .sort((a, b) => b.depositCount - a.depositCount);
+
+    if (!rows.length) {
+      dispatch(setModalText('No reports found for the selected date range'));
+      dispatch(setIsModalVisible(true));
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'CompostStands');
+    XLSX.writeFile(workbook, `compost-stands-${exportFromDate}-to-${exportToDate}.xlsx`);
+  };
+
   return (
     <div className={'DataDisplay'}>
       <h2 className={'DataDisplay__title'}>Compost Stand Data</h2>
       <PeriodSlider value={period} onChange={setPeriod} />
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'end', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label htmlFor='export-from-date'>From</label>
+          <input
+            id='export-from-date'
+            type='date'
+            value={exportFromDate}
+            onChange={(e) => setExportFromDate(e.target.value)}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label htmlFor='export-to-date'>To</label>
+          <input
+            id='export-to-date'
+            type='date'
+            value={exportToDate}
+            onChange={(e) => setExportToDate(e.target.value)}
+          />
+        </div>
+        <button
+          onClick={handleDownloadXlsx}
+          style={{
+            padding: '0.5rem 1rem',
+            backgroundColor: '#1976d2',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '0.95rem'
+          }}
+        >
+          Download XLSX
+        </button>
+      </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Compost Stand Table</h1>
-        {isStandsListVisible ? (
-          <button onClick={() => setIsStandsListVisible(false)}>Hide list</button>
-        ) : (
-          <button onClick={() => setIsStandsListVisible(true)}>Show List</button>
-        )}
-      </div>
-      {isStandsListVisible &&
-        <>
-
-          <span className='mobile-only'>Some data may not be viewable on mobile view</span>
-
-          <CompostStandTable compostStandData={compostStandData} />
-        </>
-      }
-      <CompostStandChart period={period} />
-
-      {/* Management Section */}
-      <div style={{ marginTop: '3rem', padding: '1rem', borderTop: '2px solid #ddd' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2>Manage Compost Stands</h2>
-          <button 
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
             onClick={() => setIsAddModalOpen(true)}
             style={{
               padding: '0.5rem 1rem',
@@ -184,56 +335,26 @@ const CompostStandDataDisplay = () => {
           >
             + Add Stand
           </button>
+          {isStandsListVisible ? (
+            <button onClick={() => setIsStandsListVisible(false)}>Hide list</button>
+          ) : (
+            <button onClick={() => setIsStandsListVisible(true)}>Show List</button>
+          )}
         </div>
-
-        {/* Stands Management Table */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
-          <thead>
-            <tr>
-              <th style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'left' }}>ID</th>
-              <th style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'left' }}>Name (EN)</th>
-              <th style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'left' }}>Name (HE)</th>
-              <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Status</th>
-              <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allStands.map((stand) => (
-              <tr key={stand.compostStandId}>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{stand.compostStandId}</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{stand.name_en}</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{stand.name_he}</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
-                  <span style={{ 
-                    padding: '0.25rem 0.5rem', 
-                    borderRadius: '4px',
-                    backgroundColor: stand.isActive ? '#d4edda' : '#f8d7da',
-                    color: stand.isActive ? '#155724' : '#721c24'
-                  }}>
-                    {stand.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
-                  <button
-                    onClick={() => handleToggleActive(stand)}
-                    style={{
-                      padding: '0.25rem 0.75rem',
-                      backgroundColor: stand.isActive ? '#dc3545' : '#28a745',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    {stand.isActive ? 'Disable' : 'Enable'}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
+      {isStandsListVisible &&
+        <>
+
+          <span className='mobile-only'>Some data may not be viewable on mobile view</span>
+
+          <CompostStandTable
+            compostStandData={compostStandData}
+            allStands={allStands}
+            onToggleActive={handleToggleActive}
+          />
+        </>
+      }
+      <CompostStandChart period={period} />
 
       {/* Add Stand Modal */}
       {isAddModalOpen && (

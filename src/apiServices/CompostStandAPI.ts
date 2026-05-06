@@ -11,6 +11,13 @@ export interface CompostStandFromAPI {
   displayName: string;
 }
 
+export interface CompostReportFromAPI {
+  compostStandId: number;
+  userId: string;
+  date: string;
+  depositWeight: number | string;
+}
+
 export interface CreateCompostStandParams {
   name_en: string;
   name_he: string;
@@ -123,6 +130,29 @@ export const fetchCompostReportData = async (params?: { period?: number; communi
         'Content-Type': 'application/json',
       },
     })
+    const JSONResponse = await response.json();
+    if (response.status === 400) {
+      throw new Error(JSONResponse.error);
+    }
+
+    return { data: JSONResponse, status: response.status };
+  } catch (e: any) {
+    return e;
+  }
+}
+
+export const fetchCompostReports = async (communityId?: string): Promise<ApiServiceReturnType<CompostReportFromAPI[]>> => {
+  let urlString = `${SERVER_URL}/getCompostReports`;
+  if (communityId) {
+    urlString += `?communityId=${encodeURIComponent(communityId)}`;
+  }
+
+  try {
+    const response: Response = await fetch(urlString, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     const JSONResponse = await response.json();
     if (response.status === 400) {
       throw new Error(JSONResponse.error);

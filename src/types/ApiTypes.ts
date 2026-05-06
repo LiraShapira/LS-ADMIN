@@ -20,6 +20,7 @@ export interface DepositsWeightsByStand {
   depositWeightSum: number;
   averageDepositWeight: number;
   depositCount: number;
+  depositUsersCount: number;
 }
 
 export interface CompostStandDataDTO {

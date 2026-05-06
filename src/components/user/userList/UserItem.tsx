@@ -5,7 +5,7 @@ import {
   removeCompostAdmin,
   addCompostStandAdmin,
 } from '../../../apiServices/CompostStandAdminApi';
-import { verifyUser, toggleBanUser } from '../../../apiServices/userAPI';
+import { verifyUser, toggleBanUser, deleteUser } from '../../../apiServices/userAPI';
 import { fetchAllCompostStands, CompostStandFromAPI } from '../../../apiServices/CompostStandAPI';
 
 interface UserItemProps {
@@ -18,6 +18,7 @@ const UserItem = ({ user, onUserUpdate }: UserItemProps) => {
   const [compostStands, setCompostStands] = useState<CompostStandFromAPI[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isTogglingBan, setIsTogglingBan] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchAllCompostStands().then((res) => {
@@ -121,6 +122,31 @@ const UserItem = ({ user, onUserUpdate }: UserItemProps) => {
     }
   };
 
+  const handleDeleteUser = async () => {
+    const isConfirmed = window.confirm(
+      `Are you sure you want to delete ${user.firstName} ${user.lastName}? This action cannot be undone.`
+    );
+    if (!isConfirmed) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await deleteUser(user.id);
+      if ('data' in response) {
+        if (onUserUpdate) {
+          onUserUpdate();
+        }
+      } else {
+        alert(response.message || 'Failed to delete user');
+      }
+    } catch (error: any) {
+      alert(error.message || 'Failed to delete user');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const isVerified = user.isVerified === true;
   const isBanned = user.isBanned === true;
 
@@ -192,6 +218,20 @@ const UserItem = ({ user, onUserUpdate }: UserItemProps) => {
           }}
         >
           {isTogglingBan ? 'Processing...' : isBanned ? 'Undo ban' : 'Ban user'}
+        </button>
+        <button
+          onClick={handleDeleteUser}
+          disabled={isDeleting}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#9e9e9e',
+            color: 'white',
+            border: 'none',
+            cursor: isDeleting ? 'not-allowed' : 'pointer',
+            opacity: isDeleting ? 0.6 : 1,
+          }}
+        >
+          {isDeleting ? 'Deleting...' : 'Delete user'}
         </button>
       </div>
     </div>

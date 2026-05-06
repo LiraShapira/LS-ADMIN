@@ -91,3 +91,23 @@ export const toggleBanUser = async (userId: string): Promise<ApiServiceReturnTyp
     return e;
   }
 }
+
+export const deleteUser = async (userId: string): Promise<ApiServiceReturnType<{ success: boolean }>> => {
+  try {
+    const response: Response = await fetch(`${SERVER_URL}/deleteUser`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+    const JSONResponse = await response.json();
+    if (response.status >= 400) {
+      throw new Error(JSONResponse.error || 'Failed to delete user');
+    }
+
+    return { data: JSONResponse, status: response.status };
+  } catch (e: any) {
+    return e;
+  }
+}

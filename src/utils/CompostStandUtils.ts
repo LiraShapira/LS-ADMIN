@@ -37,6 +37,7 @@ export interface CompostStandWithDepositData extends CompostStand {
   weight: number;
   averageDepositWeight: number;
   depositCount: number;
+  depositUsersCount: number;
 }
 
 export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsByStand[]): CompostStandWithDepositData[] => {
@@ -49,19 +50,22 @@ export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsBy
         reports: [],
         weight: 0,
         averageDepositWeight: 0,
-        depositCount: 0
+        depositCount: 0,
+        depositUsersCount: 0
       }
     } else {
       const weight = compostStandDTO.depositWeightSum;
       const averageDepositWeight = compostStandDTO.averageDepositWeight;
       const depositCount = compostStandDTO.depositCount;
+      const depositUsersCount = compostStandDTO.depositUsersCount;
       return {
         id,
         name,
         reports: [],
         weight,
         averageDepositWeight,
-        depositCount
+        depositCount,
+        depositUsersCount
       }
     }
   })
