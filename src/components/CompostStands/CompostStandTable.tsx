@@ -10,6 +10,14 @@ interface CompostStandTableProps {
 }
 
 export const CompostStandTable = ({ compostStandData, allStands, onToggleActive }: CompostStandTableProps) => {
+    const standsById = new Map(
+        allStands.map((stand) => [String(stand.compostStandId), stand])
+    );
+
+    const standsToRender = createCompostStandData(compostStandData.depositsWeightsByStands).filter(
+        (compostStand) => standsById.has(String(compostStand.id))
+    );
+
     return (
         <div>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -26,11 +34,9 @@ export const CompostStandTable = ({ compostStandData, allStands, onToggleActive 
                     </tr>
                 </thead>
                 <tbody>
-                    {createCompostStandData(compostStandData.depositsWeightsByStands).map(
+                    {standsToRender.map(
                         (compostStand) => {
-                            const standFromApi = allStands.find(
-                                (stand) => String(stand.compostStandId) === String(compostStand.id)
-                            );
+                            const standFromApi = standsById.get(String(compostStand.id));
                             return (
                             <CompostStandDataItem
                                 key={compostStand.id}

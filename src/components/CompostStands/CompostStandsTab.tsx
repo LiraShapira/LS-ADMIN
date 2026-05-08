@@ -45,6 +45,7 @@ const CompostStandDataDisplay = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newStandNameEn, setNewStandNameEn] = useState('');
   const [newStandNameHe, setNewStandNameHe] = useState('');
+  const [addStandValidationError, setAddStandValidationError] = useState('');
   const [exportFromDate, setExportFromDate] = useState('');
   const [exportToDate, setExportToDate] = useState('');
   const dispatch = useAppDispatch();
@@ -141,12 +142,12 @@ const CompostStandDataDisplay = () => {
 
   const handleAddStand = async () => {
     if (!newStandNameEn.trim() || !newStandNameHe.trim()) {
-      dispatch(setModalText('Please fill in both English and Hebrew names'));
-      dispatch(setIsModalVisible(true));
+      setAddStandValidationError('Both English and Hebrew name fields are required.');
       return;
     }
 
     try {
+      setAddStandValidationError('');
       dispatch(setLoading(true));
       if (!communityId) {
         dispatch(setModalText('Please select a community first'));
@@ -166,6 +167,7 @@ const CompostStandDataDisplay = () => {
       // Reset form and close modal
       setNewStandNameEn('');
       setNewStandNameHe('');
+      setAddStandValidationError('');
       setIsAddModalOpen(false);
       
       // Reload stands
@@ -380,12 +382,17 @@ const CompostStandDataDisplay = () => {
             <h2 style={{ marginTop: 0 }}>Add New Compost Stand</h2>
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                English Name:
+                English Name / Address:
               </label>
               <input
                 type="text"
                 value={newStandNameEn}
-                onChange={(e) => setNewStandNameEn(e.target.value)}
+                onChange={(e) => {
+                  setNewStandNameEn(e.target.value);
+                  if (addStandValidationError) {
+                    setAddStandValidationError('');
+                  }
+                }}
                 placeholder="e.g., Cafe Shapira"
                 style={{
                   width: '100%',
@@ -396,18 +403,20 @@ const CompostStandDataDisplay = () => {
                   boxSizing: 'border-box'
                 }}
               />
-              <small style={{ color: '#666', display: 'block', marginTop: '0.25rem' }}>
-                Name will be auto-generated: "{newStandNameEn.toLowerCase().replace(/\s+/g, '_')}"
-              </small>
             </div>
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Hebrew Name:
+                שם בעברית \ כתובת:
               </label>
               <input
                 type="text"
                 value={newStandNameHe}
-                onChange={(e) => setNewStandNameHe(e.target.value)}
+                onChange={(e) => {
+                  setNewStandNameHe(e.target.value);
+                  if (addStandValidationError) {
+                    setAddStandValidationError('');
+                  }
+                }}
                 placeholder="e.g., קפה שפירא"
                 style={{
                   width: '100%',
@@ -419,12 +428,18 @@ const CompostStandDataDisplay = () => {
                 }}
               />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+            {addStandValidationError && (
+              <div style={{ marginBottom: '1rem', color: '#c62828', fontSize: '0.95rem' }}>
+                {addStandValidationError}
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', zIndex: 1000 }}>
               <button
                 onClick={() => {
                   setIsAddModalOpen(false);
                   setNewStandNameEn('');
                   setNewStandNameHe('');
+                  setAddStandValidationError('');
                 }}
                 style={{
                   padding: '0.5rem 1rem',

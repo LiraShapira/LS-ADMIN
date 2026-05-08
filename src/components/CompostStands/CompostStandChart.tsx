@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchCompostReportData } from '../../apiServices/CompostStandAPI';
+import { selectSelectedCommunityId } from '../../store/appSlice';
+import { useAppSelector } from '../../utils/hooks';
 
 export interface ReportBooleanProperty {
   true: number;
@@ -22,9 +24,15 @@ export interface StandStats {
 
 export default function CompostReportStats({ period = 30 }: { period?: number }) {
   const [stats, setStats] = useState<StandStats[]>([]);
+  const communityId = useAppSelector(selectSelectedCommunityId);
 
   useEffect(() => {
-    fetchCompostReportData({ period })
+    if (!communityId) {
+      setStats([]);
+      return;
+    }
+
+    fetchCompostReportData({ period, communityId })
       .then((response) => {
         if (response instanceof Error) {
           throw new Error(response.message);
@@ -32,7 +40,7 @@ export default function CompostReportStats({ period = 30 }: { period?: number })
         setStats(response.data)
       })
       .catch(console.error);
-  }, [period]);
+  }, [period, communityId]);
 
   const formatPropertyName = (name: string): string => {
     return name
