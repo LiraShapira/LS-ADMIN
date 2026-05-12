@@ -1,4 +1,5 @@
-import { CompostStand, CompostStandName } from "../types/CompostStandTypes";
+import { CompostStandFromAPI } from "../apiServices/CompostStandAPI";
+import { CompostStandName, CompostReport } from "../types/CompostStandTypes";
 import { DepositsWeightsByStand } from "../types/ApiTypes";
 
 export const standsIdToNameMap: Record<number, CompostStandName> = {
@@ -33,20 +34,69 @@ export const standsNameToIdMap: Record<CompostStandName, number> = {
   cafe_shapira: 14,
 };
 
-export interface CompostStandWithDepositData extends CompostStand {
+export interface CompostStandWithDepositData {
+  id: string;
+  name: string;
+  reports: CompostReport[];
   weight: number;
   averageDepositWeight: number;
   depositCount: number;
   depositUsersCount: number;
 }
 
+/** Rows for the admin table: one row per stand in the community, with period stats when present. */
+export function mergeAllStandsWithDepositStats(
+  allStands: CompostStandFromAPI[],
+  depositsWeightsByStands: DepositsWeightsByStand[],
+): CompostStandWithDepositData[] {
+  const statsById = new Map<number, DepositsWeightsByStand>();
+  for (const s of depositsWeightsByStands) {
+    statsById.set(Number(s.id), s);
+  }
+
+  return [...allStands]
+    .sort((a, b) =>
+      (a.displayName || a.name_en || "").localeCompare(b.displayName || b.name_en || "", undefined, {
+        sensitivity: "base",
+      }),
+    )
+    .map((stand) => {
+      const dto = statsById.get(stand.compostStandId);
+      const displayName =
+        stand.displayName || stand.name_en || stand.name_he || stand.name || `Stand ${stand.compostStandId}`;
+
+      if (!dto) {
+        return {
+          id: String(stand.compostStandId),
+          name: displayName,
+          reports: [],
+          weight: 0,
+          averageDepositWeight: 0,
+          depositCount: 0,
+          depositUsersCount: 0,
+        };
+      }
+
+      return {
+        id: String(stand.compostStandId),
+        name: displayName,
+        reports: [],
+        weight: dto.depositWeightSum,
+        averageDepositWeight: dto.averageDepositWeight,
+        depositCount: dto.depositCount,
+        depositUsersCount: dto.depositUsersCount ?? 0,
+      };
+    });
+}
+
+/** Legacy: fixed stand IDs for single-community / chart compatibility. Prefer mergeAllStandsWithDepositStats for admin tables. */
 export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsByStand[]): CompostStandWithDepositData[] => {
   return Object.entries(standsIdToNameMap).map(([id, name]) => {
     const compostStandDTO = depositsWeightsByStand.find(n => Number(n.id) === Number(id));
     if (!compostStandDTO || !compostStandDTO.depositWeightSum) {
       return {
         id,
-        name,
+        name: name as string,
         reports: [],
         weight: 0,
         averageDepositWeight: 0,
@@ -60,7 +110,7 @@ export const createCompostStandData = (depositsWeightsByStand: DepositsWeightsBy
       const depositUsersCount = compostStandDTO.depositUsersCount;
       return {
         id,
-        name,
+        name: name as string,
         reports: [],
         weight,
         averageDepositWeight,

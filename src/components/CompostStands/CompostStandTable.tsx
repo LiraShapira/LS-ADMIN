@@ -1,5 +1,5 @@
 import { CompostStandDataDTO } from "../../types/ApiTypes";
-import { createCompostStandData } from "../../utils/CompostStandUtils";
+import { mergeAllStandsWithDepositStats } from "../../utils/CompostStandUtils";
 import CompostStandDataItem from "./CompostStandDataItem";
 import { CompostStandFromAPI } from "../../apiServices/CompostStandAPI";
 
@@ -14,8 +14,9 @@ export const CompostStandTable = ({ compostStandData, allStands, onToggleActive 
         allStands.map((stand) => [String(stand.compostStandId), stand])
     );
 
-    const standsToRender = createCompostStandData(compostStandData.depositsWeightsByStands).filter(
-        (compostStand) => standsById.has(String(compostStand.id))
+    const standsToRender = mergeAllStandsWithDepositStats(
+        allStands,
+        compostStandData.depositsWeightsByStands,
     );
 
     return (
