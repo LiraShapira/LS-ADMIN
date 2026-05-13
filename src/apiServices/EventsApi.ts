@@ -26,6 +26,30 @@ export const fetchLSEventsData = async (communityId?: string): Promise<ApiServic
 }
 
 
+export const createLocation = async (args: {
+  name: string;
+  communityId: string;
+}): Promise<ApiServiceReturnType<Location>> => {
+  const urlString = `${SERVER_URL}/addLocation`;
+  try {
+    const response: Response = await fetch(urlString, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(args),
+      method: 'POST',
+    });
+    const JSONResponse = await response.json();
+    if (response.status === 400) {
+      throw new Error(JSONResponse.error);
+    }
+
+    return { data: JSONResponse, status: response.status };
+  } catch (e: any) {
+    return e;
+  }
+};
+
 export const fetchLocations = async (communityId?: string): Promise<ApiServiceReturnType<Location[]>> => {
   let urlString = `${SERVER_URL}/locations`;
   if (communityId) {
