@@ -32,14 +32,21 @@ export default function CompostReportStats({ period = 30 }: { period?: number })
       return;
     }
 
+    let cancelled = false;
+
     fetchCompostReportData({ period, communityId })
       .then((response) => {
+        if (cancelled) return;
         if (response instanceof Error) {
           throw new Error(response.message);
         }
-        setStats(response.data)
+        setStats(response.data);
       })
       .catch(console.error);
+
+    return () => {
+      cancelled = true;
+    };
   }, [period, communityId]);
 
   const formatPropertyName = (name: string): string => {

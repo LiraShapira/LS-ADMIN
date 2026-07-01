@@ -26,4 +26,5 @@ export interface DepositsWeightsByStand {
 export interface CompostStandDataDTO {
   depositsWeightsByStands: DepositsWeightsByStand[],
   period: number;
+  totalDeposits?: number;
 }

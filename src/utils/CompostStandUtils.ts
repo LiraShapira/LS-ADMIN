@@ -1,6 +1,98 @@
-import { CompostStandFromAPI } from "../apiServices/CompostStandAPI";
+import { CompostReportFromAPI, CompostStandFromAPI } from "../apiServices/CompostStandAPI";
 import { CompostStandName, CompostReport } from "../types/CompostStandTypes";
-import { DepositsWeightsByStand } from "../types/ApiTypes";
+import { CompostStandDataDTO, DepositsWeightsByStand } from "../types/ApiTypes";
+
+/** Inclusive calendar-day range for "last N days" ending today. */
+export function getPeriodDateRange(periodDays: number): { from: Date; to: Date } {
+  const to = new Date();
+  to.setHours(23, 59, 59, 999);
+  const from = new Date();
+  from.setDate(to.getDate() - periodDays);
+  from.setHours(0, 0, 0, 0);
+  return { from, to };
+}
+
+export function isReportInPeriod(report: { date?: string | null }, periodDays: number): boolean {
+  if (!report.date) {
+    return true;
+  }
+  const reportDate = new Date(report.date);
+  if (Number.isNaN(reportDate.getTime())) {
+    return true;
+  }
+  const { from, to } = getPeriodDateRange(periodDays);
+  return reportDate >= from && reportDate <= to;
+}
+
+/** Format a Date as YYYY-MM-DD in local time (for date inputs). */
+export function formatLocalDateInput(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function filterReportsByDateRange<T extends { date?: string | null }>(
+  reports: T[],
+  fromDateStr: string,
+  toDateStr: string,
+): T[] {
+  const from = new Date(`${fromDateStr}T00:00:00`);
+  const to = new Date(`${toDateStr}T23:59:59.999`);
+  return reports.filter((report) => {
+    if (!report.date) {
+      return true;
+    }
+    const d = new Date(report.date);
+    return !Number.isNaN(d.getTime()) && d >= from && d <= to;
+  });
+}
+
+export function filterReportsByPeriod(
+  reports: CompostReportFromAPI[],
+  periodDays: number,
+): CompostReportFromAPI[] {
+  return reports.filter((report) => isReportInPeriod(report, periodDays));
+}
+
+export function buildCompostStandDataFromReports(
+  reports: CompostReportFromAPI[],
+  period: number,
+): CompostStandDataDTO {
+  const filtered = filterReportsByPeriod(reports, period);
+  const statsByStand = new Map<
+    number,
+    { sum: number; count: number; users: Set<string> }
+  >();
+
+  for (const report of filtered) {
+    const standId = report.compostStandId;
+    if (!statsByStand.has(standId)) {
+      statsByStand.set(standId, { sum: 0, count: 0, users: new Set() });
+    }
+    const stats = statsByStand.get(standId)!;
+    const weight = Number(report.depositWeight || 0);
+    stats.sum += Number.isFinite(weight) ? weight : 0;
+    stats.count += 1;
+    if (report.userId) {
+      stats.users.add(report.userId);
+    }
+  }
+
+  const depositsWeightsByStands: DepositsWeightsByStand[] = Array.from(
+    statsByStand.entries(),
+  ).map(([standId, stats]) => ({
+    id: String(standId),
+    name: (standsIdToNameMap[standId] || `stand_${standId}`) as CompostStandName,
+    depositWeightSum: Number(stats.sum.toFixed(2)),
+    averageDepositWeight:
+      stats.count > 0 ? Number((stats.sum / stats.count).toFixed(2)) : 0,
+    depositCount: stats.count,
+    depositUsersCount: stats.users.size,
+  }));
+
+  return { depositsWeightsByStands, period };
+}
 
 export const standsIdToNameMap: Record<number, CompostStandName> = {
   2: 'hakaveret',

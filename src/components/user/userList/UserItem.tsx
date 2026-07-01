@@ -6,27 +6,19 @@ import {
   addCompostStandAdmin,
 } from '../../../apiServices/CompostStandAdminApi';
 import { verifyUser, toggleBanUser, deleteUser } from '../../../apiServices/userAPI';
-import { fetchAllCompostStands, CompostStandFromAPI } from '../../../apiServices/CompostStandAPI';
+import { CompostStandFromAPI } from '../../../apiServices/CompostStandAPI';
 
 interface UserItemProps {
   user: User;
+  compostStands: CompostStandFromAPI[];
   onUserUpdate?: () => void;
 }
 
-const UserItem = ({ user, onUserUpdate }: UserItemProps) => {
+const UserItem = ({ user, compostStands, onUserUpdate }: UserItemProps) => {
   const [adminStandId, setAdminStandId] = useState<string>('no');
-  const [compostStands, setCompostStands] = useState<CompostStandFromAPI[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isTogglingBan, setIsTogglingBan] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    fetchAllCompostStands().then((res) => {
-      if ('data' in res && res.data) {
-        setCompostStands(res.data);
-      }
-    });
-  }, []);
 
   const onSelectNewStart = (e: ChangeEvent<HTMLSelectElement>) => {
     const currentStandId = adminStandId;

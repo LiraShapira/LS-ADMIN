@@ -141,11 +141,28 @@ export const fetchCompostReportData = async (params?: { period?: number; communi
   }
 }
 
-export const fetchCompostReports = async (communityId?: string): Promise<ApiServiceReturnType<CompostReportFromAPI[]>> => {
-  let urlString = `${SERVER_URL}/getCompostReports`;
-  if (communityId) {
-    urlString += `?communityId=${encodeURIComponent(communityId)}`;
+export const fetchCompostReports = async (params?: {
+  communityId?: string;
+  from?: string;
+  to?: string;
+  period?: number;
+}): Promise<ApiServiceReturnType<CompostReportFromAPI[]>> => {
+  const searchParams = new URLSearchParams();
+  if (params?.communityId) {
+    searchParams.set('communityId', params.communityId);
   }
+  if (params?.from) {
+    searchParams.set('from', params.from);
+  }
+  if (params?.to) {
+    searchParams.set('to', params.to);
+  }
+  if (params?.period) {
+    searchParams.set('period', String(params.period));
+  }
+
+  const query = searchParams.toString();
+  const urlString = `${SERVER_URL}/getCompostReports${query ? `?${query}` : ''}`;
 
   try {
     const response: Response = await fetch(urlString, {
@@ -163,3 +180,51 @@ export const fetchCompostReports = async (communityId?: string): Promise<ApiServ
     return e;
   }
 }
+
+export interface BackfillCompostReportsResult {
+  since: string;
+  communityId: string | null;
+  depositTransactions: number;
+  created: number;
+  skipped: number;
+  dryRun: boolean;
+  samples: unknown[];
+}
+
+export const backfillMissingCompostReports = async (params?: {
+  communityId?: string;
+  since?: string;
+}): Promise<ApiServiceReturnType<BackfillCompostReportsResult>> => {
+  const adminId = localStorage.getItem('adminId');
+  if (!adminId) {
+    return new Error('Not authenticated');
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params?.communityId) {
+    searchParams.set('communityId', params.communityId);
+  }
+  if (params?.since) {
+    searchParams.set('since', params.since);
+  }
+
+  const query = searchParams.toString();
+  const urlString = `${SERVER_URL}/admin/backfillCompostReports${query ? `?${query}` : ''}`;
+
+  try {
+    const response = await fetch(urlString, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminId}`,
+      },
+    });
+    const JSONResponse = await response.json();
+    if (!response.ok) {
+      throw new Error(JSONResponse.error || 'Backfill failed');
+    }
+    return { data: JSONResponse, status: response.status };
+  } catch (e: any) {
+    return e;
+  }
+};

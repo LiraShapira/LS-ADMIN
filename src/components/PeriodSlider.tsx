@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import { formatDate } from '../utils/timeAndDate';
 
 interface PeriodSliderProps {
@@ -12,16 +12,15 @@ const PeriodSlider = ({ value, onChange, min = 1, max = 180 }: PeriodSliderProps
   const today = new Date();
   const startDate = new Date();
   startDate.setDate(today.getDate() - value);
+  const debounceRef = useRef<NodeJS.Timeout>();
 
-  const handleChange = React.useMemo(() => {
-    let timeout: NodeJS.Timeout;
-    return (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = parseInt(e.target.value);
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        onChange(newValue);
-      }, 100);
-    };
+  const handleRangeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(e.target.value, 10);
+    if (Number.isNaN(newValue)) return;
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      onChange(newValue);
+    }, 300);
   }, [onChange]);
 
   return (
@@ -36,7 +35,7 @@ const PeriodSlider = ({ value, onChange, min = 1, max = 180 }: PeriodSliderProps
           min={min}
           max={max}
           value={value}
-          onChange={handleChange}
+          onChange={handleRangeChange}
           style={{
             width: '100%',
             direction: 'rtl',

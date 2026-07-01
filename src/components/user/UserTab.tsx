@@ -10,29 +10,43 @@ import {
   setModalText,
 } from '../../store/appSlice';
 import { selectSelectedCommunityId } from '../../store/appSlice';
+import { fetchAllCompostStands, CompostStandFromAPI } from '../../apiServices/CompostStandAPI';
 
 const UserTab = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [compostStands, setCompostStands] = useState<CompostStandFromAPI[]>([]);
   const dispatch = useAppDispatch();
   const communityId = useAppSelector(selectSelectedCommunityId);
 
   useEffect(() => {
     if (!communityId) return;
+
+    let cancelled = false;
     dispatch(setLoading(true));
-    fetchUsers(communityId)
-      .then((response) => {
-        if (response instanceof Error) {
-          throw new Error(response.message);
+
+    Promise.all([fetchUsers(communityId), fetchAllCompostStands(communityId)])
+      .then(([usersResponse, standsResponse]) => {
+        if (cancelled) return;
+        if (usersResponse instanceof Error) {
+          throw new Error(usersResponse.message);
         }
-        setUsers(response.data);
+        if (standsResponse instanceof Error) {
+          throw new Error(standsResponse.message);
+        }
+        setUsers(usersResponse.data);
+        setCompostStands(standsResponse.data);
         dispatch(setLoading(false));
       })
       .catch((e) => {
+        if (cancelled) return;
         dispatch(setLoading(false));
         dispatch(setModalText(e.message));
         dispatch(setIsModalVisible(true));
-        throw new Error(e);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch, communityId]);
 
   const onFilterUsers = (search: string) => {
@@ -71,6 +85,7 @@ const UserTab = () => {
 
         <UserItemList 
           users={users.filter((user: any) => !user._hidden)} 
+          compostStands={compostStands}
           onUserUpdate={() => {
             if (!communityId) return;
             dispatch(setLoading(true));
